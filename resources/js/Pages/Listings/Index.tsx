@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { router } from '@inertiajs/react';
 import AppLayout from '@/Layouts/AppLayout';
 import { IndexPageProps, ListingFilters, ParsedIntent } from '@/types';
@@ -10,10 +10,11 @@ import ChatBox from '@/Components/Listings/ChatBox';
 import ViewToggle from '@/Components/Listings/ViewToggle';
 import SortDropdown from '@/Components/Listings/SortDropdown';
 import ListingGrid from '@/Components/Listings/ListingGrid';
-import ListingMap from '@/Components/Listings/ListingMap';
 import EmptyState from '@/Components/Listings/EmptyState';
 import LoadingOverlay from '@/Components/Listings/LoadingOverlay';
 import Pagination from '@/Components/UI/Pagination';
+
+const ListingMap = lazy(() => import('@/Components/Listings/ListingMap'));
 
 type SearchMode = 'filters' | 'chat';
 
@@ -189,7 +190,9 @@ export default function Index({ listings, filters, sort, districts, areaSuggesti
                 />
               </>
             ) : (
-              <ListingMap listings={listings.data} />
+              <Suspense fallback={<div className="h-[500px] bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">Ładowanie mapy...</div>}>
+                <ListingMap listings={listings.data} />
+              </Suspense>
             )}
           </div>
         </div>

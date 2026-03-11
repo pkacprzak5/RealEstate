@@ -5,14 +5,14 @@ interface ListingCardProps {
   listing: Listing;
 }
 
-function formatPrice(price: number | null, currency: string): string {
+function formatPrice(price: number | string | null, currency: string): string {
   if (price === null) return 'Cena na zapytanie';
-  return new Intl.NumberFormat('pl-PL').format(price) + ' ' + currency;
+  return new Intl.NumberFormat('pl-PL').format(Number(price)) + ' ' + currency;
 }
 
-function formatArea(area: number | null): string {
+function formatArea(area: number | string | null): string {
   if (area === null) return 'Brak danych';
-  return area.toFixed(1).replace('.', ',') + ' m²';
+  return Number(area).toFixed(1).replace('.', ',') + ' m²';
 }
 
 const TYPE_LABELS = { flat: 'Mieszkanie', house: 'Dom' };
@@ -64,7 +64,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
 
         {listing.price_per_m2 && (
           <p className="text-xs text-gray-400 mt-1">
-            {new Intl.NumberFormat('pl-PL').format(listing.price_per_m2)} PLN/m²
+            {new Intl.NumberFormat('pl-PL').format(Number(listing.price_per_m2))} PLN/m²
           </p>
         )}
       </div>

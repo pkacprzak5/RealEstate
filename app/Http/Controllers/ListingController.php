@@ -75,7 +75,7 @@ class ListingController extends Controller
 
         return Inertia::render('Listings/Index', [
             'listings' => $listings,
-            'filters' => $filters,
+            'filters' => (object) $filters,
             'sort' => $sort,
             'districts' => $districts,
             'areaSuggestion' => $areaSuggestionData,

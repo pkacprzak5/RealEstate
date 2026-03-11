@@ -22,9 +22,9 @@ interface ListingMapProps {
 
 const KRAKOW_CENTER: [number, number] = [50.0647, 19.9450];
 
-function formatPrice(price: number | null, currency: string): string {
+function formatPrice(price: number | string | null, currency: string): string {
   if (price === null) return 'Cena na zapytanie';
-  return new Intl.NumberFormat('pl-PL').format(price) + ' ' + currency;
+  return new Intl.NumberFormat('pl-PL').format(Number(price)) + ' ' + currency;
 }
 
 export default function ListingMap({ listings }: ListingMapProps) {
@@ -44,7 +44,7 @@ export default function ListingMap({ listings }: ListingMapProps) {
         {markersData.map(listing => (
           <Marker
             key={listing.id}
-            position={[listing.latitude!, listing.longitude!]}
+            position={[Number(listing.latitude), Number(listing.longitude)]}
           >
             <Popup>
               <div className="w-48">

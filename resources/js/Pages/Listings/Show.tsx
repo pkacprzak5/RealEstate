@@ -1,36 +1,29 @@
+import { lazy, Suspense } from 'react';
 import { Link } from '@inertiajs/react';
 import AppLayout from '@/Layouts/AppLayout';
 import { ShowPageProps } from '@/types';
 import ImageGallery from '@/Components/Listings/ImageGallery';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
 
-const defaultIcon = L.icon({
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-});
-L.Marker.prototype.options.icon = defaultIcon;
+const LocationMap = lazy(() => import('@/Components/Listings/LocationMap'));
 
 const TYPE_LABELS = { flat: 'Mieszkanie', house: 'Dom' };
 const MARKET_LABELS = { sale: 'Sprzedaż', rent: 'Wynajem' };
 
-function formatPrice(price: number | null, currency: string): string {
+function formatPrice(price: number | string | null, currency: string): string {
   if (price === null) return 'Cena na zapytanie';
-  return new Intl.NumberFormat('pl-PL').format(price) + ' ' + currency;
+  return new Intl.NumberFormat('pl-PL').format(Number(price)) + ' ' + currency;
 }
 
 export default function Show({ listing }: ShowPageProps) {
-  const hasCoords = listing.latitude !== null && listing.longitude !== null;
+  const lat = listing.latitude ? Number(listing.latitude) : null;
+  const lng = listing.longitude ? Number(listing.longitude) : null;
+  const hasCoords = lat !== null && lng !== null;
+  const area = listing.area_m2 ? Number(listing.area_m2) : null;
+  const pricePerM2 = listing.price_per_m2 ? Number(listing.price_per_m2) : null;
 
   return (
     <AppLayout title={listing.title}>
       <div className="max-w-4xl mx-auto">
-        {/* Back link */}
         <Link
           href="/"
           className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 mb-4"
@@ -38,10 +31,8 @@ export default function Show({ listing }: ShowPageProps) {
           ← Wróć do wyników
         </Link>
 
-        {/* Image gallery */}
         <ImageGallery images={listing.image_urls ?? []} title={listing.title} />
 
-        {/* Header */}
         <div className="mt-6">
           <div className="flex flex-wrap gap-2 mb-2">
             <span className="px-2 py-0.5 bg-blue-600 text-white text-xs rounded">
@@ -55,21 +46,20 @@ export default function Show({ listing }: ShowPageProps) {
           <p className="text-2xl font-bold text-blue-600">
             {formatPrice(listing.price, listing.currency)}
           </p>
-          {listing.price_per_m2 && (
+          {pricePerM2 && (
             <p className="text-sm text-gray-500 mt-1">
-              {new Intl.NumberFormat('pl-PL').format(listing.price_per_m2)} PLN/m²
+              {new Intl.NumberFormat('pl-PL').format(pricePerM2)} PLN/m²
             </p>
           )}
         </div>
 
-        {/* Details table */}
         <div className="mt-6 bg-white rounded-lg border border-gray-200 overflow-hidden">
           <table className="w-full text-sm">
             <tbody>
-              {listing.area_m2 && (
+              {area && (
                 <tr className="border-b border-gray-100">
                   <td className="px-4 py-3 text-gray-500 w-40">Powierzchnia</td>
-                  <td className="px-4 py-3 text-gray-900">{listing.area_m2.toFixed(1).replace('.', ',')} m²</td>
+                  <td className="px-4 py-3 text-gray-900">{area.toFixed(1).replace('.', ',')} m²</td>
                 </tr>
               )}
               {listing.rooms && (
@@ -102,7 +92,6 @@ export default function Show({ listing }: ShowPageProps) {
           </table>
         </div>
 
-        {/* Description */}
         {listing.description && (
           <div className="mt-6">
             <h2 className="text-lg font-medium text-gray-900 mb-3">Opis</h2>
@@ -113,29 +102,15 @@ export default function Show({ listing }: ShowPageProps) {
           </div>
         )}
 
-        {/* Location map */}
         {hasCoords && (
           <div className="mt-6">
             <h2 className="text-lg font-medium text-gray-900 mb-3">Lokalizacja</h2>
-            <div className="h-[350px] rounded-lg overflow-hidden border border-gray-200">
-              <MapContainer
-                center={[listing.latitude!, listing.longitude!]}
-                zoom={15}
-                style={{ height: '100%', width: '100%' }}
-              >
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <Marker position={[listing.latitude!, listing.longitude!]}>
-                  <Popup>{listing.title}</Popup>
-                </Marker>
-              </MapContainer>
-            </div>
+            <Suspense fallback={<div className="h-[350px] bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">Ładowanie mapy...</div>}>
+              <LocationMap latitude={lat!} longitude={lng!} title={listing.title} />
+            </Suspense>
           </div>
         )}
 
-        {/* Source attribution */}
         <div className="mt-6 pt-4 border-t border-gray-200 text-sm text-gray-500">
           <p>
             Źródło:{' '}
