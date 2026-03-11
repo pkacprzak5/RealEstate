@@ -1,0 +1,30 @@
+{
+    "$schema": "https://json.schemastore.org/claude-code-settings.json",
+    "permissions": {
+        "allow": [
+            "Bash(ls *)",
+            "Bash(find *)",
+            "Bash(git status)",
+            "Bash(git diff *)",
+            "Bash(git log *)",
+            "Bash(cat *)",
+            "Bash(head *)",
+            "Bash(tail *)",
+            "Bash(cp *)",
+            "Bash(mv *)",
+            "Bash(rm -rf bootstrap/cache/*)",
+            "Bash(composer *)",
+            "Bash(php artisan *)",
+            "Bash(php *)",
+            "Bash(node *)",
+            "Bash(npm *)",
+            "Bash(npx *)",
+            "Bash(pnpm *)",
+            "Bash(mysql *)",
+            "Bash(docker *)",
+            "Bash(docker compose *)",
+            "Bash(vendor/bin/pest *)",
+            "Bash(vendor/bin/phpunit *)"
+        ]
+    }
+}
