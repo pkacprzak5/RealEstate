@@ -1,6 +1,12 @@
 #!/bin/sh
 set -e
 
+# Railway provides PORT env var; default to 8000 for local Docker
+export NGINX_PORT="${PORT:-8000}"
+
+# Render nginx config template (substitute $NGINX_PORT)
+envsubst '${NGINX_PORT}' < /etc/nginx/http.d/default.conf.template > /etc/nginx/http.d/default.conf
+
 # Generate app key if not set
 if [ -z "$APP_KEY" ]; then
     php artisan key:generate --force

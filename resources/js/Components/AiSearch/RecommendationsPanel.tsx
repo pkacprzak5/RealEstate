@@ -102,13 +102,10 @@ export default function RecommendationsPanel({
                 </div>
             )}
 
-            <div className="flex items-center justify-between px-6 pt-4 pb-2">
+            <div className="px-6 pt-4 pb-2">
                 <h3 className="text-sm font-semibold text-gray-900">
                     {recommendations.length} {recommendations.length === 1 ? 'rekomendacja' : recommendations.length < 5 ? 'rekomendacje' : 'rekomendacji'}
                 </h3>
-                {summary && (
-                    <span className="text-xs text-gray-400 truncate max-w-[200px]">{summary}</span>
-                )}
             </div>
 
             <div className="flex-1 px-6 pb-6 space-y-4 overflow-y-auto">

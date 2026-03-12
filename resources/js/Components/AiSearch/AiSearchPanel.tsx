@@ -27,7 +27,7 @@ export default function AiSearchPanel() {
 
     // Conversation started — show split view (desktop) or stacked (mobile)
     return (
-        <div className="flex flex-col md:flex-row h-[calc(100vh-120px)]">
+        <div className="flex flex-col md:flex-row md:h-[calc(100vh-120px)]">
             {/* Conversation Panel */}
             <div className="flex flex-col w-full md:w-[520px] md:border-r border-gray-200 bg-white shrink-0">
                 {/* Header */}
@@ -45,13 +45,15 @@ export default function AiSearchPanel() {
                     </button>
                 </div>
 
-                {/* Thread */}
-                <ConversationThread
-                    messages={messages}
-                    options={status === 'question' ? options : []}
-                    onSelectOption={selectOption}
-                    isLoading={status === 'loading'}
-                />
+                {/* Thread — fixed height on mobile so it doesn't collapse */}
+                <div className="min-h-[200px] md:min-h-0 md:flex-1">
+                    <ConversationThread
+                        messages={messages}
+                        options={status === 'question' ? options : []}
+                        onSelectOption={selectOption}
+                        isLoading={status === 'loading'}
+                    />
+                </div>
 
                 {/* Input */}
                 <ChatInput
@@ -61,7 +63,7 @@ export default function AiSearchPanel() {
                 />
             </div>
 
-            {/* Recommendations Panel — hidden on mobile when only question state, shown on results */}
+            {/* Recommendations Panel — stacked below on mobile, side panel on desktop */}
             <div className={`flex-1 min-h-0 ${
                 status !== 'results' && status !== 'error' && status !== 'no_results' ? 'hidden md:flex' : 'flex'
             }`}>

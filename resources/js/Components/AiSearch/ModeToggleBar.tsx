@@ -7,27 +7,27 @@ interface Props {
 
 export default function ModeToggleBar({ mode, onModeChange }: Props) {
     return (
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="inline-flex rounded-md bg-gray-100 p-0.5">
             <button
                 onClick={() => onModeChange('filters')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                className={`flex items-center gap-1.5 px-4 py-2 rounded text-sm font-medium transition-all ${
                     mode === 'filters'
-                        ? 'bg-blue-800 text-white'
-                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700'
                 }`}
             >
-                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <SlidersHorizontal className="w-4 h-4" />
                 Filtry
             </button>
             <button
                 onClick={() => onModeChange('ai')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
+                className={`flex items-center gap-1.5 px-4 py-2 rounded text-sm font-medium transition-all ${
                     mode === 'ai'
-                        ? 'bg-blue-800 text-white'
-                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700'
                 }`}
             >
-                <Sparkles className="w-3.5 h-3.5" />
+                <Sparkles className="w-4 h-4" />
                 Asystent AI
             </button>
         </div>

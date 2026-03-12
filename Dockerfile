@@ -23,6 +23,7 @@ RUN apk add --no-cache \
     nginx \
     supervisor \
     ca-certificates \
+    envsubst \
     && docker-php-ext-install pdo_mysql opcache
 
 # Configure PHP for production
@@ -45,8 +46,8 @@ WORKDIR /var/www/html
 COPY --from=composer /app /var/www/html
 COPY --from=frontend /app/public/build public/build
 
-# Nginx config
-COPY docker/nginx.conf /etc/nginx/http.d/default.conf
+# Nginx config template (rendered at runtime by entrypoint for dynamic PORT)
+COPY docker/nginx.conf /etc/nginx/http.d/default.conf.template
 
 # Supervisor config
 COPY docker/supervisord.conf /etc/supervisord.conf

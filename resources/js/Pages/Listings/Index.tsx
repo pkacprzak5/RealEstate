@@ -66,30 +66,21 @@ export default function Index({ listings, mapPins, filters, sort, districts, are
         <AppLayout>
             <Head title="Oferty nieruchomości w Krakowie" />
 
+            {/* Mode toggle — always visible */}
+            <div className="container-main pt-5 pb-4">
+                <ModeToggleBar mode={mode} onModeChange={setMode} />
+            </div>
+
             {mode === 'ai' ? (
-                <>
-                    {/* Sticky mode toggle bar for AI mode */}
-                    <div className="sticky top-16 z-40 bg-white border-b border-gray-200">
-                        <div className="container-main flex items-center justify-between py-3">
-                            <span className="text-sm text-gray-500">
-                                Opisz czego szukasz — asystent AI dobierze oferty
-                            </span>
-                            <ModeToggleBar mode={mode} onModeChange={setMode} />
-                        </div>
-                    </div>
-                    <AiSearchPanel />
-                </>
+                <AiSearchPanel />
             ) : (
-                <div className="container-main py-6">
-                    {/* Search + Mode Toggle on same row */}
+                <div className="container-main py-4">
+                    {/* Search */}
                     <div className="relative z-30 space-y-4 mb-6">
-                        <div className="flex items-center gap-3">
-                            <SearchBar
-                                keywords={filters.keywords || ''}
-                                onKeywordsChange={setKeywords}
-                            />
-                            <ModeToggleBar mode={mode} onModeChange={setMode} />
-                        </div>
+                        <SearchBar
+                            keywords={filters.keywords || ''}
+                            onKeywordsChange={setKeywords}
+                        />
                         <FilterBar
                             filters={filters}
                             districts={districts}
