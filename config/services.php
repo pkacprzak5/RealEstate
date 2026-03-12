@@ -40,4 +40,11 @@ return [
         'model' => env('ANTHROPIC_MODEL', 'claude-haiku-4-5-20251001'),
     ],
 
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY', ''),
+        'endpoint' => env('GEMINI_API_ENDPOINT', 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'),
+        'timeout' => env('GEMINI_TIMEOUT', 30),
+        'max_retries' => env('GEMINI_MAX_RETRIES', 1),
+    ],
+
 ];

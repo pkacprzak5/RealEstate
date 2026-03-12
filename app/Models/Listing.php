@@ -18,6 +18,8 @@ class Listing extends Model
             'latitude' => 'decimal:7',
             'longitude' => 'decimal:7',
             'image_urls' => 'array',
+            'description_features' => 'array',
+            'image_tags' => 'array',
             'published_at' => 'datetime',
             'imported_at' => 'datetime',
             'rooms' => 'integer',

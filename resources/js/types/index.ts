@@ -100,3 +100,37 @@ export interface IndexPageProps {
 export interface ShowPageProps {
   listing: Listing;
 }
+
+// --- AI Search types ---
+
+export interface AiMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+export interface AiRecommendation {
+  listing_id: number;
+  listing: Listing;
+  score: number;
+  confidence: string;
+  explanation: string;
+}
+
+export interface AiSearchResponse {
+  type: 'recommendations' | 'question' | 'no_results' | 'error';
+  message?: string;
+  summary?: string;
+  extracted_filters?: Record<string, unknown>;
+  soft_preferences?: string[];
+  recommendations?: AiRecommendation[];
+  options?: string[];
+  suggestions?: string[];
+  candidates_considered?: number;
+  widened?: boolean;
+  fallback?: boolean;
+  trace_id?: string;
+  latency_ms?: number;
+  llm_calls?: number;
+}
+
+export type AiSearchStatus = 'idle' | 'loading' | 'results' | 'question' | 'error' | 'no_results';

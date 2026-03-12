@@ -85,7 +85,7 @@ function ClusteredMarkers({
             maxClusterRadius: 50,
             spiderfyOnMaxZoom: true,
             showCoverageOnHover: false,
-            zoomToBoundsOnClick: false,
+            zoomToBoundsOnClick: true,
             animate: true,
             iconCreateFunction: (c: any) => {
                 const count = c.getChildCount();

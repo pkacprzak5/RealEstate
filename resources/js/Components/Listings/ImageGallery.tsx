@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { ChevronLeft, ChevronRight, X, ImageOff } from 'lucide-react';
 
 interface Props {
@@ -9,6 +9,36 @@ interface Props {
 export default function ImageGallery({ images, title }: Props) {
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
+
+    const goNext = useCallback(() => {
+        setActiveIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+    }, [images.length]);
+
+    const goPrev = useCallback(() => {
+        setActiveIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
+    }, [images.length]);
+
+    const closeLightbox = useCallback(() => setLightboxOpen(false), []);
+
+    // Keyboard navigation
+    useEffect(() => {
+        if (!lightboxOpen) return;
+
+        const handleKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') closeLightbox();
+            else if (e.key === 'ArrowRight') goNext();
+            else if (e.key === 'ArrowLeft') goPrev();
+        };
+
+        document.addEventListener('keydown', handleKey);
+        // Prevent body scroll while lightbox is open
+        document.body.style.overflow = 'hidden';
+
+        return () => {
+            document.removeEventListener('keydown', handleKey);
+            document.body.style.overflow = '';
+        };
+    }, [lightboxOpen, goNext, goPrev, closeLightbox]);
 
     if (images.length === 0) {
         return (
@@ -68,19 +98,29 @@ export default function ImageGallery({ images, title }: Props) {
 
             {/* Lightbox */}
             {lightboxOpen && (
-                <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center">
+                <div
+                    className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+                    onClick={(e) => {
+                        // Close when clicking the backdrop (not the image or buttons)
+                        if (e.target === e.currentTarget) closeLightbox();
+                    }}
+                >
+                    {/* Close button — top-left, well clear of navbar */}
                     <button
-                        onClick={() => setLightboxOpen(false)}
-                        className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors"
+                        onClick={closeLightbox}
+                        className="absolute top-20 left-4 z-10 w-11 h-11 flex items-center justify-center rounded-full bg-white/90 text-gray-900 hover:bg-white shadow-lg transition-colors"
+                        aria-label="Zamknij"
                     >
-                        <X className="w-8 h-8" />
+                        <X className="w-6 h-6" />
                     </button>
 
+                    {/* Previous */}
                     <button
-                        onClick={() => setActiveIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1))}
-                        className="absolute left-4 text-white hover:text-gray-300 transition-colors"
+                        onClick={goPrev}
+                        className="absolute left-4 z-10 w-12 h-12 flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors"
+                        aria-label="Poprzednie zdjęcie"
                     >
-                        <ChevronLeft className="w-10 h-10" />
+                        <ChevronLeft className="w-8 h-8" />
                     </button>
 
                     <img
@@ -89,15 +129,23 @@ export default function ImageGallery({ images, title }: Props) {
                         className="max-h-[85vh] max-w-[90vw] object-contain"
                     />
 
+                    {/* Next */}
                     <button
-                        onClick={() => setActiveIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0))}
-                        className="absolute right-4 text-white hover:text-gray-300 transition-colors"
+                        onClick={goNext}
+                        className="absolute right-4 z-10 w-12 h-12 flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors"
+                        aria-label="Następne zdjęcie"
                     >
-                        <ChevronRight className="w-10 h-10" />
+                        <ChevronRight className="w-8 h-8" />
                     </button>
 
-                    <div className="absolute bottom-4 text-white text-sm">
-                        {activeIndex + 1} / {images.length}
+                    {/* Counter + keyboard hint */}
+                    <div className="absolute bottom-4 flex flex-col items-center gap-1">
+                        <span className="text-white text-sm font-medium">
+                            {activeIndex + 1} / {images.length}
+                        </span>
+                        <span className="text-white/50 text-xs">
+                            ← → nawigacja &middot; Esc zamknij
+                        </span>
                     </div>
                 </div>
             )}

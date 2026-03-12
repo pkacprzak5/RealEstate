@@ -100,16 +100,44 @@ function DualRangeSlider({
     const pctMax = ((valueMax - min) / (max - min)) * 100;
     const fmt = formatValue || String;
 
+    // Click on the track to move the nearest thumb
+    const handleTrackClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const pct = (e.clientX - rect.left) / rect.width;
+        const rawValue = min + pct * (max - min);
+        const snapped = Math.round(rawValue / step) * step;
+        const val = clamp(snapped, min, max);
+
+        // Move whichever thumb is closer
+        const distToMin = Math.abs(val - valueMin);
+        const distToMax = Math.abs(val - valueMax);
+
+        if (distToMin <= distToMax) {
+            onMinChange(Math.min(val, valueMax - step));
+        } else {
+            onMaxChange(Math.max(val, valueMin + step));
+        }
+    };
+
+    const thumbClass = "absolute inset-0 w-full appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-navy [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-navy [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:cursor-pointer";
+
     return (
         <div className="pt-2 pb-1">
             <div className="flex justify-between text-xs text-gray-500 mb-1">
                 <span>{fmt(valueMin)}</span>
                 <span>{fmt(valueMax)}</span>
             </div>
-            <div className="relative h-5">
-                <div className="absolute top-1/2 -translate-y-1/2 w-full h-1.5 bg-gray-200 rounded-full" />
+            <div className="relative h-6">
+                {/* Clickable track area */}
                 <div
-                    className="absolute top-1/2 -translate-y-1/2 h-1.5 bg-navy rounded-full"
+                    className="absolute inset-0 cursor-pointer z-0"
+                    onClick={handleTrackClick}
+                />
+                {/* Track background */}
+                <div className="absolute top-1/2 -translate-y-1/2 w-full h-1.5 bg-gray-200 rounded-full pointer-events-none" />
+                {/* Active range fill */}
+                <div
+                    className="absolute top-1/2 -translate-y-1/2 h-1.5 bg-navy rounded-full pointer-events-none"
                     style={{ left: `${pctMin}%`, right: `${100 - pctMax}%` }}
                 />
                 <input
@@ -117,14 +145,14 @@ function DualRangeSlider({
                     min={min} max={max} step={step}
                     value={valueMin}
                     onChange={(e) => onMinChange(Math.min(Number(e.target.value), valueMax - step))}
-                    className="absolute inset-0 w-full appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-navy [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-sm [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-navy [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:shadow-sm [&::-moz-range-thumb]:cursor-pointer"
+                    className={thumbClass}
                 />
                 <input
                     type="range"
                     min={min} max={max} step={step}
                     value={valueMax}
                     onChange={(e) => onMaxChange(Math.max(Number(e.target.value), valueMin + step))}
-                    className="absolute inset-0 w-full appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-navy [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-sm [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-navy [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:shadow-sm [&::-moz-range-thumb]:cursor-pointer"
+                    className={thumbClass}
                 />
             </div>
         </div>
