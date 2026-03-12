@@ -38,9 +38,44 @@ class Listing extends Model
         return $type ? $query->where('market_type', $type) : $query;
     }
 
+    /**
+     * Kraków administrative districts → sub-areas.
+     * Selecting a parent district also includes its children.
+     */
+    private const DISTRICT_HIERARCHY = [
+        'Stare Miasto' => [],
+        'Grzegórzki' => ['Olsza'],
+        'Prądnik Czerwony' => ['Rakowice'],
+        'Prądnik Biały' => [],
+        'Krowodrza' => ['Łobzów'],
+        'Bronowice' => ['Bronowice Małe', 'Bronowice Wielkie'],
+        'Zwierzyniec' => ['Salwator', 'Wola Justowska', 'Przegorzały'],
+        'Dębniki' => ['Ruczaj', 'Zakrzówek', 'Tyniec', 'Piaski Wielkie'],
+        'Łagiewniki-Borek Fałęcki' => [],
+        'Swoszowice' => [],
+        'Podgórze Duchackie' => [],
+        'Bieżanów-Prokocim' => [],
+        'Podgórze' => ['Rybitwy', 'Rajsko', 'Wróblowice'],
+        'Czyżyny' => [],
+        'Mistrzejowice' => [],
+        'Bieńczyce' => [],
+        'Wzgórza Krzesławickie' => ['Przylasek Rusiecki'],
+        'Nowa Huta' => ['Tonie'],
+    ];
+
     public function scopeDistrict(Builder $query, ?string $district): Builder
     {
-        return $district ? $query->where('district', $district) : $query;
+        if (!$district) {
+            return $query;
+        }
+
+        // If the district is a parent with children, match parent + all children
+        if (isset(self::DISTRICT_HIERARCHY[$district]) && !empty(self::DISTRICT_HIERARCHY[$district])) {
+            $names = array_merge([$district], self::DISTRICT_HIERARCHY[$district]);
+            return $query->whereIn('district', $names);
+        }
+
+        return $query->where('district', $district);
     }
 
     public function scopePriceBetween(Builder $query, ?float $min, ?float $max): Builder

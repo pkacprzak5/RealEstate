@@ -45,6 +45,13 @@ class ListingController extends Controller
             default => $query->orderByRaw('COALESCE(published_at, imported_at) DESC'),
         };
 
+        // All map pins — clone BEFORE select/paginate to avoid limit/offset contamination
+        $mapPins = (clone $query)->reorder()
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->select(['id', 'title', 'price', 'currency', 'latitude', 'longitude', 'district', 'area_m2', 'rooms', 'property_type', 'market_type', 'thumbnail_url'])
+            ->get();
+
         // Exclude heavy fields from index page payload
         $query->select([
             'id', 'title', 'price', 'currency', 'price_per_m2', 'area_m2',
@@ -75,6 +82,7 @@ class ListingController extends Controller
 
         return Inertia::render('Listings/Index', [
             'listings' => $listings,
+            'mapPins' => $mapPins,
             'filters' => (object) $filters,
             'sort' => $sort,
             'districts' => $districts,

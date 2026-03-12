@@ -71,8 +71,24 @@ export interface ParsedIntent {
   keywords?: string;
 }
 
+export interface MapPin {
+  id: number;
+  title: string;
+  price: number | null;
+  currency: string;
+  latitude: number | null;
+  longitude: number | null;
+  district: string | null;
+  area_m2: number | null;
+  rooms: number | null;
+  property_type: 'flat' | 'house';
+  market_type: 'sale' | 'rent';
+  thumbnail_url: string | null;
+}
+
 export interface IndexPageProps {
   listings: Paginated<Listing>;
+  mapPins: MapPin[];
   filters: ListingFilters;
   sort: string;
   districts: string[];

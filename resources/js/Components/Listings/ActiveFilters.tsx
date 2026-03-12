@@ -1,62 +1,49 @@
+import { X } from 'lucide-react';
 import { ListingFilters } from '@/types';
 
-const FILTER_LABELS: Record<string, string> = {
-  property_type: 'Typ',
-  market_type: 'Transakcja',
-  district: 'Dzielnica',
-  min_price: 'Cena od',
-  max_price: 'Cena do',
-  min_area: 'Metraż od',
-  max_area: 'Metraż do',
-  min_rooms: 'Pokoje od',
-  max_rooms: 'Pokoje do',
-  keywords: 'Słowa kluczowe',
-};
-
-const VALUE_LABELS: Record<string, Record<string, string>> = {
-  property_type: { flat: 'Mieszkanie', house: 'Dom' },
-  market_type: { sale: 'Sprzedaż', rent: 'Wynajem' },
-};
-
-interface ActiveFiltersProps {
-  filters: ListingFilters;
-  onRemove: (key: keyof ListingFilters) => void;
-  onClearAll: () => void;
+interface Props {
+    filters: ListingFilters;
+    onRemove: (key: keyof ListingFilters) => void;
+    onClearAll: () => void;
 }
 
-export default function ActiveFilters({ filters, onRemove, onClearAll }: ActiveFiltersProps) {
-  const entries = Object.entries(filters).filter(([, v]) => v !== undefined && v !== null && v !== '');
+const filterLabels: Record<string, (v: string | number) => string> = {
+    property_type: (v) => v === 'flat' ? 'Mieszkanie' : 'Dom',
+    market_type: (v) => v === 'sale' ? 'Sprzedaż' : 'Wynajem',
+    district: (v) => String(v),
+    min_price: (v) => `od ${(Number(v) / 1000).toFixed(0)}k zł`,
+    max_price: (v) => `do ${(Number(v) / 1000).toFixed(0)}k zł`,
+    min_area: (v) => `od ${v} m²`,
+    max_area: (v) => `do ${v} m²`,
+    min_rooms: (v) => `od ${v} pokoi`,
+    max_rooms: (v) => `do ${v} pokoi`,
+    keywords: (v) => `"${v}"`,
+};
 
-  if (entries.length === 0) return null;
+export default function ActiveFilters({ filters, onRemove, onClearAll }: Props) {
+    const entries = Object.entries(filters).filter(([, v]) => v !== undefined && v !== '');
+    if (entries.length === 0) return null;
 
-  return (
-    <div className="flex flex-wrap gap-2 items-center">
-      {entries.map(([key, value]) => {
-        const label = FILTER_LABELS[key] || key;
-        const displayValue = VALUE_LABELS[key]?.[String(value)] || String(value);
-
-        return (
-          <span
-            key={key}
-            className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
-          >
-            {label}: {displayValue}
+    return (
+        <div className="flex flex-wrap items-center gap-2">
+            {entries.map(([key, value]) => (
+                <button
+                    key={key}
+                    type="button"
+                    onClick={() => onRemove(key as keyof ListingFilters)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-navy-50 text-navy text-xs font-medium rounded-full hover:bg-navy/10 transition-colors"
+                >
+                    {filterLabels[key]?.(value!) ?? String(value)}
+                    <X className="w-3 h-3" />
+                </button>
+            ))}
             <button
-              onClick={() => onRemove(key as keyof ListingFilters)}
-              className="ml-1 text-blue-600 hover:text-blue-800"
-              aria-label={`Usuń filtr ${label}`}
+                type="button"
+                onClick={onClearAll}
+                className="text-xs text-gray-500 hover:text-gray-700 underline"
             >
-              ×
+                Wyczyść
             </button>
-          </span>
-        );
-      })}
-      <button
-        onClick={onClearAll}
-        className="text-sm text-gray-500 hover:text-gray-700"
-      >
-        Wyczyść wszystkie
-      </button>
-    </div>
-  );
+        </div>
+    );
 }

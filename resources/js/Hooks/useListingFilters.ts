@@ -1,71 +1,69 @@
 import { router } from '@inertiajs/react';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useRef } from 'react';
 import { ListingFilters } from '@/types';
 
-interface UseListingFiltersOptions {
-  filters: ListingFilters;
-  sort: string;
-  query: string | null;
-}
+export function useListingFilters(currentFilters: ListingFilters, currentSort: string) {
+    const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
-export function useListingFilters({ filters, sort, query }: UseListingFiltersOptions) {
-  const updateFilters = useCallback((newFilters: Partial<ListingFilters>, newSort?: string) => {
-    const merged = { ...filters, ...newFilters };
-    const cleaned: Record<string, string | number> = {};
-    for (const [key, value] of Object.entries(merged)) {
-      if (value !== undefined && value !== null && value !== '') {
-        cleaned[key] = value;
-      }
-    }
-    if (newSort || sort !== 'newest') {
-      cleaned.sort = newSort || sort;
-    }
-    if (query) {
-      cleaned.q = query;
-    }
+    const navigate = useCallback((filters: ListingFilters, sort: string, options?: { debounce?: number }) => {
+        const params: Record<string, string> = {};
+        if (filters.property_type) params.property_type = filters.property_type;
+        if (filters.market_type) params.market_type = filters.market_type;
+        if (filters.district) params.district = filters.district;
+        if (filters.min_price) params.min_price = String(filters.min_price);
+        if (filters.max_price) params.max_price = String(filters.max_price);
+        if (filters.min_area) params.min_area = String(filters.min_area);
+        if (filters.max_area) params.max_area = String(filters.max_area);
+        if (filters.min_rooms) params.min_rooms = String(filters.min_rooms);
+        if (filters.max_rooms) params.max_rooms = String(filters.max_rooms);
+        if (filters.keywords) params.keywords = filters.keywords;
+        if (sort && sort !== 'newest') params.sort = sort;
 
-    router.get('/', cleaned, {
-      preserveState: true,
-      preserveScroll: true,
-    });
-  }, [filters, sort, query]);
+        const visit = () => router.get('/', params, { preserveState: true, preserveScroll: true });
 
-  const setFilter = useCallback((key: keyof ListingFilters, value: string | number | undefined) => {
-    updateFilters({ [key]: value });
-  }, [updateFilters]);
+        if (options?.debounce) {
+            clearTimeout(timeoutRef.current);
+            timeoutRef.current = setTimeout(visit, options.debounce);
+        } else {
+            visit();
+        }
+    }, []);
 
-  const removeFilter = useCallback((key: keyof ListingFilters) => {
-    const newFilters = { ...filters };
-    delete newFilters[key];
-    updateFilters(newFilters);
-  }, [filters, updateFilters]);
+    const setFilter = useCallback((key: keyof ListingFilters, value: string | number | undefined) => {
+        const next = { ...currentFilters, [key]: value || undefined };
+        navigate(next, currentSort);
+    }, [currentFilters, currentSort, navigate]);
 
-  const clearAllFilters = useCallback(() => {
-    router.get('/', {}, { preserveState: true });
-  }, []);
+    const setFilters = useCallback((updates: Partial<ListingFilters>) => {
+        const next = { ...currentFilters };
+        for (const [key, value] of Object.entries(updates)) {
+            if (value === undefined || value === '' || value === null) {
+                delete next[key as keyof ListingFilters];
+            } else {
+                (next as any)[key] = value;
+            }
+        }
+        navigate(next, currentSort);
+    }, [currentFilters, currentSort, navigate]);
 
-  const setSort = useCallback((newSort: string) => {
-    updateFilters({}, newSort);
-  }, [updateFilters]);
+    const removeFilter = useCallback((key: keyof ListingFilters) => {
+        const next = { ...currentFilters };
+        delete next[key];
+        navigate(next, currentSort);
+    }, [currentFilters, currentSort, navigate]);
 
-  const submitSearch = useCallback((searchQuery: string) => {
-    router.get('/', { q: searchQuery }, { preserveState: true });
-  }, []);
+    const clearAll = useCallback(() => {
+        navigate({}, 'newest');
+    }, [navigate]);
 
-  const activeFilterCount = useMemo(() => {
-    return Object.values(filters).filter(v => v !== undefined && v !== null && v !== '').length;
-  }, [filters]);
+    const setSort = useCallback((sort: string) => {
+        navigate(currentFilters, sort);
+    }, [currentFilters, navigate]);
 
-  return {
-    filters,
-    sort,
-    query,
-    updateFilters,
-    setFilter,
-    removeFilter,
-    clearAllFilters,
-    setSort,
-    submitSearch,
-    activeFilterCount,
-  };
+    const setKeywords = useCallback((keywords: string) => {
+        const next = { ...currentFilters, keywords: keywords || undefined };
+        navigate(next, currentSort, { debounce: 400 });
+    }, [currentFilters, currentSort, navigate]);
+
+    return { setFilter, setFilters, removeFilter, clearAll, setSort, setKeywords, currentFilters, currentSort };
 }

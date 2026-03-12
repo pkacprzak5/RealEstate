@@ -1,68 +1,42 @@
-import { router } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { PaginationLink } from '@/types';
 
-interface PaginationProps {
-  links: PaginationLink[];
-  currentPage: number;
-  lastPage: number;
+interface Props {
+    links: PaginationLink[];
+    currentPage: number;
+    lastPage: number;
 }
 
-export default function Pagination({ links, currentPage, lastPage }: PaginationProps) {
-  if (lastPage <= 1) return null;
+export default function Pagination({ links, currentPage, lastPage }: Props) {
+    if (lastPage <= 1) return null;
 
-  const navigate = (url: string | null) => {
-    if (url) {
-      router.get(url, {}, { preserveState: true, preserveScroll: true });
-    }
-  };
+    const pageLinks = links.slice(1, -1);
 
-  return (
-    <nav className="flex justify-center items-center gap-1 mt-6">
-      {links.map((link, i) => {
-        const isNav = i === 0 || i === links.length - 1;
-        const label = link.label
-          .replace('&laquo;', '«')
-          .replace('&raquo;', '»')
-          .replace('Previous', 'Poprzednia')
-          .replace('Next', 'Następna');
-
-        return (
-          <button
-            key={i}
-            onClick={() => navigate(link.url)}
-            disabled={!link.url}
-            className={`px-3 py-1.5 text-sm rounded-md ${
-              link.active
-                ? 'bg-blue-600 text-white'
-                : link.url
-                  ? 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                  : 'text-gray-400 cursor-not-allowed'
-            } ${isNav ? 'hidden sm:inline-flex' : ''}`}
-            dangerouslySetInnerHTML={{ __html: label }}
-          />
-        );
-      })}
-
-      {/* Mobile: simplified prev/next */}
-      <div className="flex sm:hidden gap-2">
-        <button
-          onClick={() => navigate(links[0]?.url)}
-          disabled={currentPage === 1}
-          className="px-4 py-2 text-sm rounded-md bg-white border border-gray-300 disabled:text-gray-400 disabled:cursor-not-allowed"
-        >
-          « Poprzednia
-        </button>
-        <span className="px-3 py-2 text-sm text-gray-600">
-          {currentPage} / {lastPage}
-        </span>
-        <button
-          onClick={() => navigate(links[links.length - 1]?.url)}
-          disabled={currentPage === lastPage}
-          className="px-4 py-2 text-sm rounded-md bg-white border border-gray-300 disabled:text-gray-400 disabled:cursor-not-allowed"
-        >
-          Następna »
-        </button>
-      </div>
-    </nav>
-  );
+    return (
+        <div className="flex items-center gap-1 justify-center">
+            {currentPage > 1 && links[0].url && (
+                <Link href={links[0].url} className="w-9 h-9 flex items-center justify-center rounded bg-white border border-gray-300 hover:bg-gray-50">
+                    <ChevronLeft className="w-4 h-4 text-gray-400" />
+                </Link>
+            )}
+            {pageLinks.map((link) => (
+                <Link
+                    key={link.label}
+                    href={link.url || '#'}
+                    className={`w-9 h-9 flex items-center justify-center rounded text-sm ${
+                        link.active
+                            ? 'bg-navy text-white font-semibold'
+                            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                    }`}
+                    dangerouslySetInnerHTML={{ __html: link.label }}
+                />
+            ))}
+            {currentPage < lastPage && links[links.length - 1].url && (
+                <Link href={links[links.length - 1].url!} className="w-9 h-9 flex items-center justify-center rounded bg-white border border-gray-300 hover:bg-gray-50">
+                    <ChevronRight className="w-4 h-4 text-gray-700" />
+                </Link>
+            )}
+        </div>
+    );
 }

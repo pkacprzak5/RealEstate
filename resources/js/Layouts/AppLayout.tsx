@@ -1,29 +1,21 @@
-import { Link, Head } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
+import { Building2 } from 'lucide-react';
 import { PropsWithChildren } from 'react';
 
-export default function AppLayout({ children, title }: PropsWithChildren<{ title?: string }>) {
-  return (
-    <>
-      <Head title={title ? `${title} | Nieruchomości Kraków` : 'Nieruchomości Kraków'} />
-
-      <div className="min-h-screen bg-gray-50">
-        <nav className="bg-white border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between h-16 items-center">
-              <Link href="/" className="text-xl font-bold text-gray-900">
-                Nieruchomości Kraków
-              </Link>
-              <div className="text-sm text-gray-500 hidden sm:block">
-                Mieszkania i domy na sprzedaż i wynajem
-              </div>
-            </div>
-          </div>
-        </nav>
-
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          {children}
-        </main>
-      </div>
-    </>
-  );
+export default function AppLayout({ children }: PropsWithChildren) {
+    return (
+        <div className="min-h-screen bg-gray-50">
+            <nav className="sticky top-0 z-50 h-16 bg-white border-b border-gray-200">
+                <div className="h-full max-w-[1440px] mx-auto px-8 flex items-center">
+                    <Link href="/" className="flex items-center gap-2">
+                        <Building2 className="w-6 h-6 text-navy" />
+                        <span className="text-lg font-bold text-navy tracking-tight">
+                            NieruchomościKRK
+                        </span>
+                    </Link>
+                </div>
+            </nav>
+            <main className="relative z-0">{children}</main>
+        </div>
+    );
 }

@@ -1,133 +1,209 @@
+import { Head, Link } from '@inertiajs/react';
 import { lazy, Suspense } from 'react';
-import { Link } from '@inertiajs/react';
+import { ChevronRight, MapPin, Maximize2, DoorOpen, Building, Banknote, Calendar, ExternalLink } from 'lucide-react';
 import AppLayout from '@/Layouts/AppLayout';
-import { ShowPageProps } from '@/types';
+import Badge from '@/Components/UI/Badge';
 import ImageGallery from '@/Components/Listings/ImageGallery';
+import { ShowPageProps } from '@/types';
 
 const LocationMap = lazy(() => import('@/Components/Listings/LocationMap'));
 
-const TYPE_LABELS = { flat: 'Mieszkanie', house: 'Dom' };
-const MARKET_LABELS = { sale: 'Sprzedaż', rent: 'Wynajem' };
-
-function formatPrice(price: number | string | null, currency: string): string {
-  if (price === null) return 'Cena na zapytanie';
-  return new Intl.NumberFormat('pl-PL').format(Number(price)) + ' ' + currency;
+function formatPrice(price: number | null, currency: string): string {
+    if (price === null) return 'Zapytaj o cenę';
+    return new Intl.NumberFormat('pl-PL', { style: 'currency', currency, maximumFractionDigits: 0 }).format(Number(price));
 }
 
 export default function Show({ listing }: ShowPageProps) {
-  const lat = listing.latitude ? Number(listing.latitude) : null;
-  const lng = listing.longitude ? Number(listing.longitude) : null;
-  const hasCoords = lat !== null && lng !== null;
-  const area = listing.area_m2 ? Number(listing.area_m2) : null;
-  const pricePerM2 = listing.price_per_m2 ? Number(listing.price_per_m2) : null;
+    const hasCoords = listing.latitude !== null && listing.longitude !== null;
 
-  return (
-    <AppLayout title={listing.title}>
-      <div className="max-w-4xl mx-auto">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 mb-4"
-        >
-          ← Wróć do wyników
-        </Link>
+    const detailRows = [
+        { label: 'Typ nieruchomości', value: listing.property_type === 'flat' ? 'Mieszkanie' : 'Dom' },
+        { label: 'Rynek', value: listing.market_type === 'sale' ? 'Sprzedaż' : 'Wynajem' },
+        listing.area_m2 ? { label: 'Powierzchnia', value: `${Number(listing.area_m2)} m²` } : null,
+        listing.rooms ? { label: 'Pokoje', value: String(Number(listing.rooms)) } : null,
+        listing.floor ? { label: 'Piętro', value: `${Number(listing.floor)}${listing.building_floors ? ` / ${Number(listing.building_floors)}` : ''}` } : null,
+        listing.district ? { label: 'Dzielnica', value: listing.district } : null,
+        listing.street ? { label: 'Ulica', value: listing.street } : null,
+    ].filter(Boolean) as { label: string; value: string }[];
 
-        <ImageGallery images={listing.image_urls ?? []} title={listing.title} />
+    const keyFacts = [
+        listing.area_m2 ? { icon: Maximize2, label: 'Powierzchnia', value: `${Number(listing.area_m2)} m²` } : null,
+        listing.rooms ? { icon: DoorOpen, label: 'Pokoje', value: `${Number(listing.rooms)}` } : null,
+        listing.price_per_m2 ? { icon: Banknote, label: 'Cena za m²', value: `${new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Number(listing.price_per_m2))} zł` } : null,
+        { icon: Building, label: 'Typ', value: listing.property_type === 'flat' ? 'Mieszkanie' : 'Dom' },
+    ].filter(Boolean) as { icon: typeof Maximize2; label: string; value: string }[];
 
-        <div className="mt-6">
-          <div className="flex flex-wrap gap-2 mb-2">
-            <span className="px-2 py-0.5 bg-blue-600 text-white text-xs rounded">
-              {TYPE_LABELS[listing.property_type]}
-            </span>
-            <span className="px-2 py-0.5 bg-green-600 text-white text-xs rounded">
-              {MARKET_LABELS[listing.market_type]}
-            </span>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">{listing.title}</h1>
-          <p className="text-2xl font-bold text-blue-600">
-            {formatPrice(listing.price, listing.currency)}
-          </p>
-          {pricePerM2 && (
-            <p className="text-sm text-gray-500 mt-1">
-              {new Intl.NumberFormat('pl-PL').format(pricePerM2)} PLN/m²
-            </p>
-          )}
-        </div>
+    return (
+        <AppLayout>
+            <Head title={listing.title} />
 
-        <div className="mt-6 bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <table className="w-full text-sm">
-            <tbody>
-              {area && (
-                <tr className="border-b border-gray-100">
-                  <td className="px-4 py-3 text-gray-500 w-40">Powierzchnia</td>
-                  <td className="px-4 py-3 text-gray-900">{area.toFixed(1).replace('.', ',')} m²</td>
-                </tr>
-              )}
-              {listing.rooms && (
-                <tr className="border-b border-gray-100">
-                  <td className="px-4 py-3 text-gray-500">Pokoje</td>
-                  <td className="px-4 py-3 text-gray-900">{listing.rooms}</td>
-                </tr>
-              )}
-              {listing.floor !== null && (
-                <tr className="border-b border-gray-100">
-                  <td className="px-4 py-3 text-gray-500">Piętro</td>
-                  <td className="px-4 py-3 text-gray-900">
-                    {listing.floor}{listing.building_floors ? ` / ${listing.building_floors}` : ''}
-                  </td>
-                </tr>
-              )}
-              {listing.district && (
-                <tr className="border-b border-gray-100">
-                  <td className="px-4 py-3 text-gray-500">Dzielnica</td>
-                  <td className="px-4 py-3 text-gray-900">{listing.district}</td>
-                </tr>
-              )}
-              {listing.street && (
-                <tr className="border-b border-gray-100">
-                  <td className="px-4 py-3 text-gray-500">Ulica</td>
-                  <td className="px-4 py-3 text-gray-900">{listing.street}</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+            <div className="container-main py-6">
+                {/* Breadcrumb */}
+                <nav className="flex items-center gap-1.5 text-sm text-gray-500 mb-4">
+                    <Link href="/" className="hover:text-navy transition-colors">Oferty</Link>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                    {listing.district && (
+                        <>
+                            <Link
+                                href={`/?district=${listing.district}`}
+                                className="hover:text-navy transition-colors"
+                            >
+                                {listing.district}
+                            </Link>
+                            <ChevronRight className="w-3.5 h-3.5" />
+                        </>
+                    )}
+                    <span className="text-gray-900 font-medium truncate max-w-xs">{listing.title}</span>
+                </nav>
 
-        {listing.description && (
-          <div className="mt-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-3">Opis</h2>
-            <div
-              className="prose prose-sm max-w-none text-gray-700"
-              dangerouslySetInnerHTML={{ __html: listing.description }}
-            />
-          </div>
-        )}
+                {/* Gallery */}
+                <ImageGallery images={listing.image_urls || []} title={listing.title} />
 
-        {hasCoords && (
-          <div className="mt-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-3">Lokalizacja</h2>
-            <Suspense fallback={<div className="h-[350px] bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">Ładowanie mapy...</div>}>
-              <LocationMap latitude={lat!} longitude={lng!} title={listing.title} />
-            </Suspense>
-          </div>
-        )}
+                {/* Content */}
+                <div className="relative z-10 mt-6 flex gap-8">
+                    {/* Main column */}
+                    <div className="flex-1 min-w-0">
+                        {/* Badges + Title */}
+                        <div className="flex gap-2 mb-2">
+                            <Badge variant="property">
+                                {listing.property_type === 'flat' ? 'Mieszkanie' : 'Dom'}
+                            </Badge>
+                            <Badge variant="market">
+                                {listing.market_type === 'sale' ? 'Sprzedaż' : 'Wynajem'}
+                            </Badge>
+                        </div>
+                        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                            {listing.title}
+                        </h1>
+                        {(listing.district || listing.street) && (
+                            <p className="flex items-center gap-1.5 text-sm text-gray-500 mb-4">
+                                <MapPin className="w-4 h-4" />
+                                {[listing.street, listing.district, 'Kraków'].filter(Boolean).join(', ')}
+                            </p>
+                        )}
 
-        <div className="mt-6 pt-4 border-t border-gray-200 text-sm text-gray-500">
-          <p>
-            Źródło:{' '}
-            <a
-              href={listing.source_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-800"
-            >
-              Otodom
-            </a>
-          </p>
-          <p className="mt-1">
-            Zaimportowano: {new Date(listing.imported_at).toLocaleDateString('pl-PL')}
-          </p>
-        </div>
-      </div>
-    </AppLayout>
-  );
+                        {/* Price */}
+                        <p className="text-[28px] font-bold text-navy mb-1">
+                            {formatPrice(listing.price, listing.currency)}
+                        </p>
+                        {listing.price_per_m2 && (
+                            <p className="text-sm text-gray-500 mb-6">
+                                {new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Number(listing.price_per_m2))} zł/m²
+                            </p>
+                        )}
+
+                        {/* Key Facts */}
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+                            {keyFacts.map((fact, i) => (
+                                <div key={i} className="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                    <fact.icon className="w-5 h-5 text-navy mb-1.5" />
+                                    <p className="text-xs text-gray-500">{fact.label}</p>
+                                    <p className="text-sm font-semibold text-gray-900">{fact.value}</p>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Description */}
+                        {listing.description && (
+                            <div className="mb-8">
+                                <h2 className="text-lg font-semibold text-gray-900 mb-3">Opis</h2>
+                                <div
+                                    className="text-sm text-gray-700 leading-relaxed whitespace-pre-line"
+                                    dangerouslySetInnerHTML={{ __html: listing.description }}
+                                />
+                            </div>
+                        )}
+
+                        {/* Location Map */}
+                        {hasCoords && (
+                            <div className="mb-8">
+                                <h2 className="text-lg font-semibold text-gray-900 mb-3">Lokalizacja</h2>
+                                <Suspense fallback={
+                                    <div className="h-[300px] bg-gray-100 rounded-lg flex items-center justify-center">
+                                        <div className="w-8 h-8 border-3 border-navy/20 border-t-navy rounded-full animate-spin" />
+                                    </div>
+                                }>
+                                    <LocationMap
+                                        lat={Number(listing.latitude!)}
+                                        lng={Number(listing.longitude!)}
+                                    />
+                                </Suspense>
+                            </div>
+                        )}
+
+                        {/* Details Table */}
+                        <div className="mb-8">
+                            <h2 className="text-lg font-semibold text-gray-900 mb-3">Szczegóły</h2>
+                            <div className="border border-gray-200 rounded-lg overflow-hidden">
+                                {detailRows.map((row, i) => (
+                                    <div
+                                        key={row.label}
+                                        className={`flex justify-between px-4 py-3 text-sm ${
+                                            i % 2 === 0 ? 'bg-gray-50' : 'bg-white'
+                                        }`}
+                                    >
+                                        <span className="text-gray-500">{row.label}</span>
+                                        <span className="text-gray-900 font-medium">{row.value}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Provenance */}
+                        <div className="border-t border-gray-200 pt-6">
+                            <h2 className="text-lg font-semibold text-gray-900 mb-3">Źródło</h2>
+                            <div className="space-y-2 text-sm text-gray-500">
+                                {listing.source_url && (
+                                    <p>
+                                        Źródło:{' '}
+                                        <a
+                                            href={listing.source_url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-navy hover:underline inline-flex items-center gap-1"
+                                        >
+                                            Otodom <ExternalLink className="w-3 h-3" />
+                                        </a>
+                                    </p>
+                                )}
+                                {listing.published_at && (
+                                    <p>Opublikowano: {new Date(listing.published_at).toLocaleDateString('pl-PL')}</p>
+                                )}
+                                <p>Zaimportowano: {new Date(listing.imported_at).toLocaleDateString('pl-PL')}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Sidebar */}
+                    <div className="hidden lg:block w-[340px] flex-shrink-0">
+                        <div className="sticky top-24 space-y-4">
+                            <div className="bg-white border border-gray-200 rounded-lg p-5">
+                                <p className="text-2xl font-bold text-navy mb-1">
+                                    {formatPrice(listing.price, listing.currency)}
+                                </p>
+                                {listing.price_per_m2 && (
+                                    <p className="text-sm text-gray-500 mb-5">
+                                        {new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Number(listing.price_per_m2))} zł/m²
+                                    </p>
+                                )}
+
+                                {listing.source_url && (
+                                    <a
+                                        href={listing.source_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center justify-center gap-2 w-full h-11 bg-teal text-white text-sm font-semibold rounded-md hover:bg-teal-700 transition-colors mb-3"
+                                    >
+                                        <ExternalLink className="w-4 h-4" />
+                                        Zobacz na Otodom
+                                    </a>
+                                )}
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </AppLayout>
+    );
 }
