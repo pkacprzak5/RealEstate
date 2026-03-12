@@ -3,7 +3,7 @@ FROM node:20-alpine AS frontend
 WORKDIR /app
 COPY package.json package-lock.json .npmrc ./
 RUN npm ci --legacy-peer-deps
-COPY vite.config.ts tsconfig.json tailwind.config.js postcss.config.js ./
+COPY vite.config.js tsconfig.json tailwind.config.js postcss.config.js ./
 COPY resources/ resources/
 RUN npm run build
 
@@ -23,7 +23,7 @@ RUN apk add --no-cache \
     nginx \
     supervisor \
     ca-certificates \
-    envsubst \
+    gettext \
     && docker-php-ext-install pdo_mysql opcache
 
 # Configure PHP for production
@@ -39,6 +39,10 @@ RUN { \
     echo 'upload_max_filesize=10M'; \
     echo 'post_max_size=12M'; \
   } > /usr/local/etc/php/conf.d/production.ini
+
+# Allow php-fpm to pass through environment variables
+RUN sed -i 's/;clear_env = no/clear_env = no/' /usr/local/etc/php-fpm.d/www.conf && \
+    grep -q 'clear_env' /usr/local/etc/php-fpm.d/www.conf || echo 'clear_env = no' >> /usr/local/etc/php-fpm.d/www.conf
 
 WORKDIR /var/www/html
 
