@@ -1,3 +1,4 @@
+# Cache-bust: v2 — force Railway to rebuild all layers
 # Stage 1: Build frontend assets
 FROM node:20-alpine AS frontend
 WORKDIR /app
