@@ -65,7 +65,8 @@ RUN chown -R www-data:www-data storage bootstrap/cache \
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-EXPOSE 8000
+# No EXPOSE — Railway uses PORT env var (default 8080) to route traffic
+# Nginx listens on $PORT dynamically via entrypoint
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["supervisord", "-c", "/etc/supervisord.conf"]
