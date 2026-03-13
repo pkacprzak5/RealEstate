@@ -11,9 +11,6 @@ class AiSearchController extends Controller
 {
     public function search(Request $request, AiSearchOrchestrator $orchestrator): JsonResponse
     {
-        // Force JSON validation responses (this is an API endpoint in web.php)
-        $request->headers->set('Accept', 'application/json');
-
         $validated = $request->validate([
             'messages' => 'required|array|min:1|max:20',
             'messages.*.role' => 'required|string|in:user,assistant',

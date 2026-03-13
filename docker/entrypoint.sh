@@ -62,10 +62,6 @@ cat > /var/www/html/public/health.php <<'HEALTH'
 echo json_encode(['status' => 'php_ok', 'php' => PHP_VERSION]);
 HEALTH
 
-# Ensure storage is writable by php-fpm (www-data)
-chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
-
 # PHP error logging to stderr
 echo "log_errors = On" > /usr/local/etc/php/conf.d/debug.ini
 echo "error_log = /dev/stderr" >> /usr/local/etc/php/conf.d/debug.ini
@@ -82,7 +78,7 @@ echo 'BODY: ' . \$response->getContent() . PHP_EOL;
 
 # Diagnostic: check if route cache and config cache are valid
 echo "==> Route list check..."
-php artisan route:list --compact 2>&1 | head -20 || true
+php artisan route:list 2>&1 | head -20 || true
 
 echo "==> Config check..."
 php artisan tinker --execute="
@@ -92,6 +88,11 @@ echo 'APP_URL: ' . config('app.url') . PHP_EOL;
 echo 'APP_KEY set: ' . (config('app.key') ? 'yes' : 'NO') . PHP_EOL;
 echo 'SESSION: ' . config('session.driver') . PHP_EOL;
 " 2>&1 || true
+
+# Fix storage permissions LAST — after all root artisan commands that may write to logs
+echo "==> Fixing storage permissions..."
+chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 echo "==> Entrypoint complete, starting services..."
 exec "$@"
