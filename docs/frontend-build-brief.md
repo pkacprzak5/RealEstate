@@ -35,17 +35,18 @@ Listings/Index
 │   │   ├── DistrictFilter (select dropdown from districts[])
 │   │   └── AreaSuggestion (conditional banner, "Dodaj filtr?" button)
 │   └── ActiveFilters (removable chips for each active filter)
-├── [Zapytaj mode]
-│   └── ChatBox
+├── [AI Search mode]
+│   └── AiSearchPanel (conversational AI search)
 │       ├── ChatInput ("Opisz czego szukasz...")
-│       ├── ChatMessage (AI interpretation bubble)
-│       └── ParsedFiltersCard (shows extracted filters, "Zastosuj" button)
+│       ├── Conversation messages (user + AI bubbles, clarifying questions)
+│       └── RecommendationsPanel
+│           └── AiRecommendationCard × N (score, explanation, listing details)
 ├── ViewToggle (Lista | Mapa)
 ├── SortDropdown (Cena ↑↓, Metraż ↑↓, Najnowsze)
 ├── LoadingOverlay (shown during Inertia navigation)
 ├── ListingGrid
 │   └── ListingCard × N
-├── ListingMap (Leaflet, markers with popup mini-cards)
+├── MapView (Leaflet, markers with popup mini-cards)
 ├── Pagination
 └── EmptyState ("Brak wyników...")
 
@@ -187,16 +188,24 @@ interface ListingDetail {
 - SearchBar: on Enter or button click, adds `keywords` param
 - AreaSuggestion: only shown when rooms filter active AND suggestion exists; "Dodaj filtr?" applies min_area/max_area in single update
 
-## Vague-Intent Search UX (Zapytaj Mode)
+## AI Conversational Search UX
 
-- Toggle between "Filtry" and "Zapytaj" at top of filter area
-- ChatBox has a text input and submit button
+- Toggle between "Filtry" and AI Search at top of filter area
+- AiSearchPanel has a conversational chat interface
+- On submit: `POST /ai-search` with `{messages, question_count}`
+- Backend runs 4-step pipeline: PreferenceExtractor → CandidateRetriever → ListingRanker → Orchestrator
+- AI may ask clarifying questions (up to 2) when confidence is low
+- Results appear as ranked recommendations with scores and Polish explanations
+- Each recommendation links to the full listing detail page
+- Uses `useAiSearch` hook for state management (messages, loading, results)
+- All AI calls use Gemini 2.5 Flash; falls back to deterministic ranking if unavailable
+
+## Keyword Search
+
+- In the structured filter tab, the search bar accepts plain text keywords
 - On submit: Inertia GET to `/?q={text}`
-- Backend returns `intentParsed` with extracted filters
-- ChatMessage bubble shows AI interpretation
-- ParsedFiltersCard shows the extracted filter values
-- "Zastosuj filtry" button applies them as structured filters (switches to Filtry mode)
-- "Zmień zapytanie" lets user edit and resubmit
+- Backend runs LIKE search across title, description, district, street
+- Sufficient for ~100 listings; upgrade to full-text index at scale
 
 ## Loading / Empty / Error States
 
@@ -222,5 +231,7 @@ interface ListingDetail {
 - Tailwind utility classes only, no custom CSS
 - Clean, minimal design — white background, subtle borders
 - Cards with shadow-sm, rounded-lg
-- Primary color: blue-600 for buttons and active states
+- Primary color: blue-800 for buttons and active states (navy blue, professional look)
+- Rounding: rounded-lg for cards/panels, rounded-md for buttons/inputs
+- Glass effect: bg-white/80 backdrop-blur-lg for navbar
 - Polish language throughout all labels, buttons, placeholders

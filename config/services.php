@@ -35,11 +35,6 @@ return [
         ],
     ],
 
-    'anthropic' => [
-        'api_key' => env('ANTHROPIC_API_KEY'),
-        'model' => env('ANTHROPIC_MODEL', 'claude-haiku-4-5-20251001'),
-    ],
-
     'gemini' => [
         'api_key' => env('GEMINI_API_KEY', ''),
         'endpoint' => env('GEMINI_API_ENDPOINT', 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'),

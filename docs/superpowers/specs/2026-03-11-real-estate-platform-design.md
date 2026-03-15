@@ -2,7 +2,7 @@
 
 ## Problem
 
-Build a simplified smart real-estate listings platform for Kraków as a take-home assignment. Ingest ~100 listings (flats + houses, sale + rent) from Otodom.pl, normalize into MySQL (TiDB), and provide browse/search/details with map view, image galleries, and a vague-intent natural-language search. Deploy publicly on Koyeb.
+Build a simplified smart real-estate listings platform for Kraków as a take-home assignment. Ingest ~100 listings (flats + houses, sale + rent) from Otodom.pl, normalize into MySQL (MySQL), and provide browse/search/details with map view, image galleries, and a vague-intent natural-language search. Deploy publicly on Railway.
 
 ## Locked Defaults
 
@@ -12,10 +12,10 @@ Build a simplified smart real-estate listings platform for Kraków as a take-hom
 - Target corpus: ~100 listings (~25 per category)
 - Language: Polish throughout (UI + content)
 - Backend: Laravel
-- Database: TiDB Cloud Starter (MySQL-compatible)
+- Database: MySQL (Railway addon)
 - Frontend: Inertia + React + TypeScript
 - Styling: Tailwind
-- Deployment: Koyeb
+- Deployment: Railway
 - Goal: temporary public clickable demo
 
 ## MVP Scope
@@ -23,17 +23,17 @@ Build a simplified smart real-estate listings platform for Kraków as a take-hom
 ### In scope
 
 - Otodom scraper (4 categories: flat/house × sale/rent)
-- Deterministic normalization + persistence in TiDB
+- Deterministic normalization + persistence in MySQL
 - Seed JSON fallback for demo reliability
 - Listings page with structured filters
 - Grid view / map view toggle (Leaflet + OSM)
-- Keyword search (LIKE — TiDB Cloud Starter may not support FULLTEXT; 100 rows = no concern)
-- Vague-intent NL search (Claude Haiku → structured filters)
+- Keyword search (LIKE — MySQL Cloud Starter may not support FULLTEXT; 100 rows = no concern)
+- Vague-intent NL search (Gemini 2.5 Flash → structured filters)
 - Smart area suggestion (data-driven, when rooms filter is active)
 - Strict room range filtering
 - Listing detail page with image gallery + location map
 - Sorting (price, area, newest)
-- Public Koyeb deployment
+- Public Railway deployment
 - Submission docs (README, reasoning doc, user journeys, demo script)
 
 ### Out of scope
@@ -121,7 +121,7 @@ CREATE TABLE listings (
     INDEX idx_price (price),
     INDEX idx_area (area_m2),
     INDEX idx_rooms (rooms),
-    -- No FULLTEXT: TiDB compat; using LIKE for keyword search (100 rows)
+    -- No FULLTEXT: MySQL compat; using LIKE for keyword search (100 rows)
 );
 ```
 
@@ -234,8 +234,8 @@ interface ListingSummary {
 
 ## Deployment
 
-- App: Koyeb (Docker or buildpack)
-- DB: TiDB Cloud Starter
+- App: Railway (Docker or buildpack)
+- DB: MySQL Cloud Starter
 - Seed data on deploy via `php artisan db:seed`
 - Leaflet/OSM tiles: free, no API key
 - Claude API: env var for vague-intent feature

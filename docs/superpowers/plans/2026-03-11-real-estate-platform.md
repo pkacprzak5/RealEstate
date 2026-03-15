@@ -4,13 +4,13 @@
 
 **Goal:** Build a smart real-estate listings platform for Kraków with Otodom ingestion (Playwright), structured search, AI-powered vague-intent search, map view, and image galleries. Polish UI throughout.
 
-**Architecture:** Laravel 11 backend with Inertia.js serving React/TypeScript frontend. Node.js Playwright script scrapes Otodom → JSON file → PHP artisan command imports into TiDB (MySQL-compatible). Two-page app: listings index (grid/map toggle + filters + NL search) and listing detail (gallery + map). Claude Haiku powers vague-intent query parsing with keyword search fallback.
+**Architecture:** Laravel 11 backend with Inertia.js serving React/TypeScript frontend. Node.js Playwright script scrapes Otodom → JSON file → PHP artisan command imports into MySQL (MySQL-compatible). Two-page app: listings index (grid/map toggle + filters + NL search) and listing detail (gallery + map). Gemini 2.5 Flash powers vague-intent query parsing with keyword search fallback.
 
-**Tech Stack:** Laravel 11, Inertia.js, React 18, TypeScript, Tailwind CSS 3, Leaflet + react-leaflet, Playwright (scraping), TiDB Cloud Starter, Koyeb (Docker), Claude API (Haiku)
+**Tech Stack:** Laravel 11, Inertia.js, React 18, TypeScript, Tailwind CSS 3, Leaflet + react-leaflet, Playwright (scraping), MySQL (Railway addon), Railway (Docker), Claude API (Haiku)
 
 **Spec:** `docs/superpowers/specs/2026-03-11-real-estate-platform-design.md`
 
-**Spec overrides from CLAUDE.md:** Polish UI throughout (CLAUDE.md defaults to English UI; changed per user decision). LIKE keyword search instead of FULLTEXT (TiDB Cloud Starter compatibility; 100 rows = no performance concern).
+**Spec overrides from CLAUDE.md:** Polish UI throughout (CLAUDE.md defaults to English UI; changed per user decision). LIKE keyword search instead of FULLTEXT (MySQL (Railway addon) compatibility; 100 rows = no performance concern).
 
 ---
 
@@ -25,7 +25,7 @@ scripts/scrape-otodom.mjs              — Playwright scraper, outputs JSON
 # Backend
 app/Models/Listing.php                  — Eloquent model with casts, scopes, accessors
 app/Http/Controllers/ListingController.php — index (filtered/sorted/paginated) + show
-app/Services/IntentParserService.php    — Claude Haiku vague-intent → structured filters
+app/Services/IntentParserService.php    — Gemini 2.5 Flash vague-intent → structured filters
 app/Services/AreaSuggestionService.php  — Data-driven area range for room count
 app/Console/Commands/ImportListings.php — Reads JSON, normalizes, upserts into DB
 
@@ -213,18 +213,18 @@ DB_PASSWORD=password
 
 Add to `.env.example`:
 ```
-# Database (local: MySQL via docker-compose, prod: TiDB Cloud)
+# Database (local: MySQL via docker-compose, prod: MySQL Cloud)
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=real_estate
 DB_USERNAME=root
 DB_PASSWORD=password
-# TiDB requires: MYSQL_ATTR_SSL_CA=/etc/ssl/certs/ca-certificates.crt
+# MySQL requires: MYSQL_ATTR_SSL_CA=/etc/ssl/certs/ca-certificates.crt
 
 # Claude API (for vague-intent search)
-ANTHROPIC_API_KEY=
-ANTHROPIC_MODEL=claude-haiku-4-5-20251001
+GEMINI_API_KEY=
+GEMINI_API_ENDPOINT=https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}
 
 # App
 APP_LOCALE=pl
@@ -292,7 +292,7 @@ return new class extends Migration
 };
 ```
 
-Note: No FULLTEXT index — TiDB Cloud Starter may not support it. Use `LIKE` for keyword search (100 rows = zero performance concern).
+Note: No FULLTEXT index — MySQL (Railway addon) may not support it. Use `LIKE` for keyword search (100 rows = zero performance concern).
 
 - [ ] **Step 5: Start MySQL and run migration**
 
@@ -1174,7 +1174,7 @@ git commit -m "feat: ListingController with filtered index + show"
 
 ---
 
-### Task 8: IntentParserService (Claude Haiku)
+### Task 8: IntentParserService (Gemini 2.5 Flash)
 
 **Files:**
 - Create: `app/Services/IntentParserService.php`
@@ -1185,10 +1185,10 @@ git commit -m "feat: ListingController with filtered index + show"
 In `config/services.php`, add:
 
 ```php
-'anthropic' => [
-    'key' => env('ANTHROPIC_API_KEY'),
-    'model' => env('ANTHROPIC_MODEL', 'claude-haiku-4-5-20251001'),
-    'base_url' => env('ANTHROPIC_BASE_URL', 'https://api.anthropic.com'),
+'gemini' => [
+    'key' => env('GEMINI_API_KEY'),
+    'endpoint' => env('GEMINI_API_ENDPOINT'),
+    'timeout' => env('GEMINI_TIMEOUT', 30),
 ],
 ```
 
@@ -1336,7 +1336,7 @@ Expected: `['property_type' => 'flat', 'max_price' => 500000, 'min_rooms' => 2, 
 
 ```bash
 git add app/Services/IntentParserService.php config/services.php
-git commit -m "feat: IntentParserService with Claude Haiku + fallback"
+git commit -m "feat: IntentParserService with Gemini 2.5 Flash + fallback"
 ```
 
 **Acceptance criteria:**
@@ -3576,20 +3576,20 @@ php artisan tinker --execute="if(App\Models\Listing::count()===0){Artisan::call(
 exec /init
 ```
 
-- [ ] **Step 4: Update .env.example with TiDB production config notes**
+- [ ] **Step 4: Update .env.example with MySQL production config notes**
 
 Add comments:
 ```
-# Production (TiDB Cloud Starter):
-# DB_HOST=gateway01.eu-central-1.prod.aws.tidbcloud.com
+# Production (MySQL (Railway addon)):
+# DB_HOST=${{MySQL.MYSQLHOST}}
 # DB_PORT=4000
 # DB_DATABASE=real_estate
-# DB_USERNAME=<from TiDB console>
-# DB_PASSWORD=<from TiDB console>
+# DB_USERNAME=<from MySQL console>
+# DB_PASSWORD=<from MySQL console>
 # MYSQL_ATTR_SSL_CA=/etc/ssl/certs/ca-certificates.crt
 #
-# Koyeb:
-# APP_URL=https://<your-app>.koyeb.app
+# Railway:
+# APP_URL=https://<your-app>.up.railway.app
 # APP_ENV=production
 # APP_DEBUG=false
 ```
@@ -3617,44 +3617,44 @@ git commit -m "feat: production Dockerfile + entrypoint + deploy config"
 
 ---
 
-### Task 21: Koyeb deployment setup
+### Task 21: Railway deployment setup
 
-**Files:** No new files — deployment is configured via Koyeb dashboard + env vars.
+**Files:** No new files — deployment is configured via Railway dashboard + env vars.
 
-- [ ] **Step 1: Document Koyeb deployment steps**
+- [ ] **Step 1: Document Railway deployment steps**
 
-Koyeb deployment (via GitHub integration or Docker):
+Railway deployment (via GitHub integration or Docker):
 
 1. Push code to GitHub
-2. Create Koyeb app → connect to GitHub repo
+2. Create Railway app → connect to GitHub repo
 3. Set build type: Dockerfile
 4. Set environment variables:
    - `APP_KEY` — generate with `php artisan key:generate --show`
    - `APP_ENV=production`
    - `APP_DEBUG=false`
-   - `APP_URL=https://<app>.koyeb.app`
+   - `APP_URL=https://<app>.up.railway.app`
    - `DB_CONNECTION=mysql`
-   - `DB_HOST=<tidb-host>`
+   - `DB_HOST=<mysql-host>`
    - `DB_PORT=4000`
    - `DB_DATABASE=real_estate`
-   - `DB_USERNAME=<tidb-user>`
-   - `DB_PASSWORD=<tidb-password>`
+   - `DB_USERNAME=<mysql-user>`
+   - `DB_PASSWORD=<mysql-password>`
    - `MYSQL_ATTR_SSL_CA=/etc/ssl/certs/ca-certificates.crt`
-   - `ANTHROPIC_API_KEY=<key>`
+   - `GEMINI_API_KEY=<key>`
 5. Set port: 8080
 6. Set health check: HTTP GET /
 7. Deploy
 
-Post-deploy commands (via Koyeb web terminal or SSH):
+Post-deploy commands (via Railway web terminal or SSH):
 ```bash
 php artisan migrate --force
 php artisan db:seed --force
 ```
 
-- [ ] **Step 2: Test TiDB connection locally**
+- [ ] **Step 2: Test MySQL connection locally**
 
 ```bash
-# Set TiDB env vars in .env temporarily
+# Set MySQL env vars in .env temporarily
 php artisan migrate --pretend
 # Verify SQL is compatible
 ```
@@ -3666,7 +3666,7 @@ php artisan migrate --pretend
 **Acceptance criteria:**
 - Deployment steps are documented and reproducible
 - One person with credentials can deploy in <15 minutes
-- App boots on Koyeb with TiDB backend
+- App boots on Railway with MySQL backend
 
 ---
 
@@ -3685,7 +3685,7 @@ Key sections:
 - Quick start (local dev: docker compose + artisan + npm)
 - Scraping + importing data
 - Environment variables table
-- Deployment (Koyeb + TiDB)
+- Deployment (Railway + MySQL)
 - Architecture decisions (link to REASONING.md)
 - Known limitations
 
@@ -3697,8 +3697,8 @@ Structure:
 3. **Search** — Structured filters + LIKE keyword search (no heavyweight infra for 100 rows)
 4. **AI features** — Vague-intent only, with deterministic fallback. Area suggestion is data-driven, not AI. Intentional, explainable, logged.
 5. **Frontend** — Inertia for simplicity (no separate API), Leaflet for free maps, custom gallery over library deps
-6. **Deployment** — Koyeb for simplicity, TiDB for MySQL compat with free tier, Docker for reproducibility
-7. **Explicit tradeoffs** — LIKE instead of FULLTEXT (TiDB compat, 100 rows = no concern); Polish UI override from CLAUDE.md English default (user decision); nulls pushed to end in sort, not excluded
+6. **Deployment** — Railway for simplicity, MySQL for MySQL compat with free tier, Docker for reproducibility
+7. **Explicit tradeoffs** — LIKE instead of FULLTEXT (MySQL compat, 100 rows = no concern); Polish UI override from CLAUDE.md English default (user decision); nulls pushed to end in sort, not excluded
 8. **Known limitations** — No auth, no image proxy/CDN, no map clustering, LIKE search, no E2E tests, Polish pluralization simplified, Leaflet popups use full page reload
 9. **What I would do with more time** — Auth, saved searches, Elasticsearch, image optimization, map clustering, more tests
 
@@ -3737,7 +3737,7 @@ A 2-3 minute walkthrough for an evaluator:
 # Demo Script
 
 ## Setup (already deployed)
-Open: https://<app>.koyeb.app
+Open: https://<app>.up.railway.app
 
 ## 1. Browse all listings (30s)
 - Homepage shows ~100 listings as cards

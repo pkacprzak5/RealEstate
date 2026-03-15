@@ -58,19 +58,6 @@ export interface AreaSuggestion {
   label: string;
 }
 
-export interface ParsedIntent {
-  property_type?: string;
-  market_type?: string;
-  district?: string;
-  min_price?: number;
-  max_price?: number;
-  min_area?: number;
-  max_area?: number;
-  min_rooms?: number;
-  max_rooms?: number;
-  keywords?: string;
-}
-
 export interface MapPin {
   id: number;
   title: string;
@@ -93,7 +80,6 @@ export interface IndexPageProps {
   sort: string;
   districts: string[];
   areaSuggestion: AreaSuggestion | null;
-  intentParsed: ParsedIntent | null;
   query: string | null;
 }
 

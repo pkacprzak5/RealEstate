@@ -18,10 +18,10 @@ Unless explicitly changed, assume:
 - Market: sale
 - Target corpus size: about 100 listings
 - Backend: Laravel
-- Database: MySQL-compatible TiDB Cloud Starter
+- Database: MySQL (Railway addon)
 - Frontend: Inertia + React + TypeScript
 - Styling: Tailwind
-- Deployment target: Koyeb
+- Deployment target: Railway
 - Product/demo language: English UI, source content may remain Polish where appropriate
 
 ## Interaction policy
@@ -167,14 +167,14 @@ Always verify:
 
 ## Deployment expectations
 Prepare for a temporary public, clickable deployment.
-Default target is Koyeb for the app and TiDB Cloud Starter for the database.
+Default target is Railway for the app and Railway MySQL addon for the database.
 
 Deployment is not complete unless:
 - required env vars are documented
 - migrations are accounted for
 - production app boot command is correct
 - asset build strategy is correct
-- TiDB connection settings are correct for Laravel
+- MySQL connection settings are correct for Laravel
 - data import/seed strategy is defined for the deployed environment
 - smoke checks are listed
 - the app is realistically one credential/login step away from public availability if secrets are missing

@@ -8,9 +8,9 @@
 
 3. **Set room count** — Selects "3" in both "Od" and "Do" room dropdowns. Results narrow to 3-room flats. An area suggestion banner appears: *"Typowa powierzchnia dla 3-pokojowych to 55–85 m²"*.
 
-4. **Apply area suggestion** — Clicks "Dodaj filtr metrażu". Area range filters are populated automatically. Filter chips update.
+4. **Apply area suggestion** — Clicks "Dodaj filtr metrażu". Area range filters are populated automatically from real listing data (P10–P90 percentiles). Filter chips update.
 
-5. **Filter by district** — Selects "Krowodrza" from the district dropdown. Results narrow further.
+5. **Filter by district** — Selects "Krowodrza" from the district dropdown. Results narrow further (includes sub-districts like Łobzów, Azory).
 
 6. **Sort by price** — Changes sort to "Cena rosnąco" to see cheapest options first.
 
@@ -27,22 +27,22 @@
 
 ---
 
-## Journey 2: Natural Language Search — "Student looking for a cheap studio near the center"
+## Journey 2: AI Conversational Search — "Young professional looking for a quiet flat with a balcony near a park"
 
-1. **Switch to Zapytaj mode** — Clicks "Zapytaj" tab at the top.
+1. **Open AI Search** — User opens the AI Search panel on the listings page.
 
-2. **Type query** — Enters: *"tanie kawalerki do wynajęcia blisko centrum, max 2500 zł"*. Clicks "Zapytaj".
+2. **Describe what they want** — Types: *"Szukam spokojnego mieszkania z balkonem w okolicy parku, najlepiej 2 pokoje, do wynajęcia"*.
 
-3. **See AI interpretation** — A chat-style bubble appears showing what the AI understood:
-   - Typ: Mieszkanie
-   - Transakcja: Wynajem
-   - Pokoje od: 1, Pokoje do: 1
-   - Cena do: 2500
+3. **Clarifying question** — The AI detects low confidence (no budget specified) and asks: *"Jaki masz budżet miesięczny na wynajem?"*. User replies: *"do 3000 zł"*.
 
-4. **Apply filters** — Clicks "Zastosuj filtry". The app switches to Filtry mode with all extracted values pre-filled. Active filter chips confirm the selection.
+4. **See ranked recommendations** — The AI returns the top 5 matching listings, each with:
+   - A match score (e.g., 0.87)
+   - A Polish explanation: *"Spokojne mieszkanie na Dębnikach z balkonem, blisko Parku Zakrzówek. 2 pokoje, 2400 zł/mies."*
+   - Key details: price, area, rooms, district
 
-5. **Browse results** — Scrolls through affordable studio apartments for rent.
+5. **Explore a recommendation** — Clicks through to the detail page. Reviews the gallery, description, and map. Notes the source link for contacting the landlord.
 
-6. **Adjust manually** — Realizes the budget is too tight, removes the "Cena do: 2500" chip by clicking ×. Results expand to include more options.
+6. **Return and try again** — Goes back, refines the query: *"A może coś na Kazimierzu?"*. The AI re-ranks based on the updated preference.
 
-7. **Find a match** — Opens a promising listing, reviews the gallery and description, notes the Otodom source link for contacting the landlord.
+**What makes this different:** The user never touched a single filter dropdown. They described their lifestyle needs ("quiet", "balcony", "near a park") and the AI matched those against features extracted from Polish descriptions — nearby POIs, amenities, noise indicators.
+

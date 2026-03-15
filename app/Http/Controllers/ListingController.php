@@ -4,26 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\Listing;
 use App\Services\AreaSuggestionService;
-use App\Services\IntentParserService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ListingController extends Controller
 {
-    public function index(Request $request, IntentParserService $intentParser, AreaSuggestionService $areaSuggestion): Response
+    public function index(Request $request, AreaSuggestionService $areaSuggestion): Response
     {
         $filters = $this->extractFilters($request);
-        $intentParsed = null;
 
-        // Always parse NL query when present; structured filters override AI-parsed ones
+        // Keyword search via ?q= param (plain keyword LIKE search)
         $nlQuery = $request->input('q');
-        if ($nlQuery) {
-            $intentParsed = $intentParser->parse($nlQuery);
-            if ($intentParsed) {
-                // AI-parsed filters are defaults; explicit structured filters take priority
-                $filters = array_merge(array_filter($intentParsed), $filters);
-            }
+        if ($nlQuery && !isset($filters['keywords'])) {
+            $filters['keywords'] = $nlQuery;
         }
 
         $query = Listing::query()
@@ -87,7 +81,6 @@ class ListingController extends Controller
             'sort' => $sort,
             'districts' => $districts,
             'areaSuggestion' => $areaSuggestionData,
-            'intentParsed' => $intentParsed,
             'query' => $nlQuery,
         ]);
     }

@@ -30,7 +30,7 @@ function getPersistedMode(): 'filters' | 'ai' {
 
 let persistedMode: 'filters' | 'ai' = getPersistedMode();
 
-export default function Index({ listings, mapPins, filters, sort, districts, areaSuggestion, intentParsed, query }: IndexPageProps) {
+export default function Index({ listings, mapPins, filters, sort, districts, areaSuggestion, query }: IndexPageProps) {
     const { setFilter, setFilters, removeFilter, clearAll, setSort, setKeywords } = useListingFilters(filters, sort);
     const [view, setView] = useState<'list' | 'map'>(() => {
         if (typeof window !== 'undefined') {
