@@ -201,32 +201,6 @@ RULES:
 PROMPT;
     }
 
-    /**
-     * Analyze a listing image and extract tags.
-     */
-    public static function imageTagging(): string
-    {
-        return <<<PROMPT
-Analyze this real-estate listing photo. Extract visible features.
-
-Output ONLY valid JSON:
-{
-  "tags": ["array of observed features"],
-  "room_type": "living room/bedroom/kitchen/bathroom/exterior/balcony/other" or null,
-  "style": "modern/classic/minimalist/industrial/traditional" or null,
-  "condition": "new/renovated/good/needs-work" or null,
-  "brightness": "bright/average/dark" or null,
-  "notable": "one sentence about the most notable visual feature" or null
-}
-
-RULES:
-- Only tag what is clearly visible — do NOT guess or infer
-- Prefix uncertain observations with "likely:"
-- Keep tags concise: "modern kitchen", "wooden floors", "city view", "green courtyard"
-- Maximum 10 tags
-PROMPT;
-    }
-
     private static function formatConversation(array $messages): string
     {
         $lines = [];

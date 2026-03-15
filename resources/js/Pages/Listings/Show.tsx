@@ -4,14 +4,10 @@ import { ChevronRight, MapPin, Maximize2, DoorOpen, Building, Banknote, Calendar
 import AppLayout from '@/Layouts/AppLayout';
 import Badge from '@/Components/UI/Badge';
 import ImageGallery from '@/Components/Listings/ImageGallery';
+import { formatPrice } from '@/utils/format';
 import { ShowPageProps } from '@/types';
 
 const LocationMap = lazy(() => import('@/Components/Listings/LocationMap'));
-
-function formatPrice(price: number | null, currency: string): string {
-    if (price === null) return 'Zapytaj o cenę';
-    return new Intl.NumberFormat('pl-PL', { style: 'currency', currency, maximumFractionDigits: 0 }).format(Number(price));
-}
 
 export default function Show({ listing }: ShowPageProps) {
     const hasCoords = listing.latitude !== null && listing.longitude !== null;
@@ -21,7 +17,7 @@ export default function Show({ listing }: ShowPageProps) {
         { label: 'Rynek', value: listing.market_type === 'sale' ? 'Sprzedaż' : 'Wynajem' },
         listing.area_m2 ? { label: 'Powierzchnia', value: `${Number(listing.area_m2)} m²` } : null,
         listing.rooms ? { label: 'Pokoje', value: String(Number(listing.rooms)) } : null,
-        listing.floor ? { label: 'Piętro', value: `${Number(listing.floor)}${listing.building_floors ? ` / ${Number(listing.building_floors)}` : ''}` } : null,
+        listing.floor !== null && listing.floor !== undefined ? { label: 'Piętro', value: `${Number(listing.floor)}${listing.building_floors ? ` / ${Number(listing.building_floors)}` : ''}` } : null,
         listing.district ? { label: 'Dzielnica', value: listing.district } : null,
         listing.street ? { label: 'Ulica', value: listing.street } : null,
     ].filter(Boolean) as { label: string; value: string }[];
@@ -107,10 +103,9 @@ export default function Show({ listing }: ShowPageProps) {
                         {listing.description && (
                             <div className="mb-8">
                                 <h2 className="text-lg font-semibold text-gray-900 mb-3">Opis</h2>
-                                <div
-                                    className="text-sm text-gray-700 leading-relaxed whitespace-pre-line"
-                                    dangerouslySetInnerHTML={{ __html: listing.description }}
-                                />
+                                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+                                    {listing.description}
+                                </p>
                             </div>
                         )}
 

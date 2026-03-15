@@ -1,6 +1,5 @@
 import { Search } from 'lucide-react';
 import { useState } from 'react';
-import { router } from '@inertiajs/react';
 
 interface Props {
     keywords: string;

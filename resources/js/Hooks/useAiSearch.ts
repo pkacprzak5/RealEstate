@@ -64,14 +64,20 @@ export function useAiSearch() {
 
     const sendMessage = useCallback(async (content: string) => {
         const userMessage: AiMessage = { role: 'user', content };
-        const newMessages = [...state.messages, userMessage];
 
-        setState(prev => ({
-            ...prev,
-            messages: newMessages,
-            status: 'loading',
-            error: null,
-        }));
+        // Read current state via functional updater to avoid stale closure
+        let newMessages: AiMessage[] = [];
+        let currentQuestionCount = 0;
+        setState(prev => {
+            newMessages = [...prev.messages, userMessage];
+            currentQuestionCount = prev.questionCount;
+            return {
+                ...prev,
+                messages: newMessages,
+                status: 'loading',
+                error: null,
+            };
+        });
 
         abortRef.current?.abort();
         const controller = new AbortController();
@@ -87,7 +93,7 @@ export function useAiSearch() {
                 },
                 body: JSON.stringify({
                     messages: newMessages,
-                    question_count: state.questionCount,
+                    question_count: currentQuestionCount,
                 }),
                 signal: controller.signal,
             });
@@ -166,7 +172,7 @@ export function useAiSearch() {
                 error: err instanceof Error ? err.message : 'Błąd sieci. Spróbuj ponownie.',
             }));
         }
-    }, [state.messages, state.questionCount, setState]);
+    }, [setState]);
 
     const reset = useCallback(() => {
         abortRef.current?.abort();

@@ -1,5 +1,5 @@
 import { Head, router } from '@inertiajs/react';
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import AppLayout from '@/Layouts/AppLayout';
 import SearchBar from '@/Components/Listings/SearchBar';
 import FilterBar from '@/Components/Listings/FilterBar';
@@ -13,6 +13,7 @@ import Pagination from '@/Components/UI/Pagination';
 import ModeToggleBar from '@/Components/AiSearch/ModeToggleBar';
 import AiSearchPanel from '@/Components/AiSearch/AiSearchPanel';
 import { useListingFilters } from '@/Hooks/useListingFilters';
+import { pluralizePl } from '@/utils/format';
 import { IndexPageProps } from '@/types';
 
 const MapView = lazy(() => import('@/Components/Listings/MapView'));
@@ -47,9 +48,11 @@ export default function Index({ listings, mapPins, filters, sort, districts, are
     };
     const [loading, setLoading] = useState(false);
 
-    // Listen to Inertia events for loading state
-    router.on('start', () => setLoading(true));
-    router.on('finish', () => setLoading(false));
+    useEffect(() => {
+        const removeStart = router.on('start', () => setLoading(true));
+        const removeFinish = router.on('finish', () => setLoading(false));
+        return () => { removeStart(); removeFinish(); };
+    }, []);
 
     const handleViewChange = (newView: 'list' | 'map') => {
         setView(newView);
@@ -97,7 +100,7 @@ export default function Index({ listings, mapPins, filters, sort, districts, are
                     {/* Results bar */}
                     <div className="flex items-center justify-between mb-5">
                         <p className="text-sm text-gray-500">
-                            {listings.total} {listings.total === 1 ? 'oferta' : listings.total < 5 ? 'oferty' : 'ofert'}
+                            {listings.total} {pluralizePl(listings.total, 'oferta', 'oferty', 'ofert')}
                         </p>
                         <div className="flex items-center gap-3">
                             <SortDropdown value={sort} onChange={setSort} />

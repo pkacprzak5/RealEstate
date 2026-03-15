@@ -29,8 +29,9 @@ export default function Pagination({ links, currentPage, lastPage }: Props) {
                             ? 'bg-navy text-white font-semibold'
                             : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                     }`}
-                    dangerouslySetInnerHTML={{ __html: link.label }}
-                />
+                >
+                    {link.label.replace(/&laquo;/g, '\u00AB').replace(/&raquo;/g, '\u00BB')}
+                </Link>
             ))}
             {currentPage < lastPage && links[links.length - 1].url && (
                 <Link href={links[links.length - 1].url!} className="w-9 h-9 flex items-center justify-center rounded bg-white border border-gray-300 hover:bg-gray-50">

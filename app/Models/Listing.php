@@ -82,22 +82,22 @@ class Listing extends Model
 
     public function scopePriceBetween(Builder $query, ?float $min, ?float $max): Builder
     {
-        if ($min) $query->where('price', '>=', $min);
-        if ($max) $query->where('price', '<=', $max);
+        if ($min !== null) $query->where('price', '>=', $min);
+        if ($max !== null) $query->where('price', '<=', $max);
         return $query;
     }
 
     public function scopeAreaBetween(Builder $query, ?float $min, ?float $max): Builder
     {
-        if ($min) $query->where('area_m2', '>=', $min);
-        if ($max) $query->where('area_m2', '<=', $max);
+        if ($min !== null) $query->where('area_m2', '>=', $min);
+        if ($max !== null) $query->where('area_m2', '<=', $max);
         return $query;
     }
 
     public function scopeRoomsBetween(Builder $query, ?int $min, ?int $max): Builder
     {
-        if ($min) $query->where('rooms', '>=', $min);
-        if ($max) $query->where('rooms', '<=', $max);
+        if ($min !== null) $query->where('rooms', '>=', $min);
+        if ($max !== null) $query->where('rooms', '<=', $max);
         return $query;
     }
 

@@ -100,41 +100,6 @@ class DeterministicEnricher
         'public_transport_nearby' => ['tramwaj', 'tramwaju', 'tramwajowy', 'autobus', 'autobusu', 'przystanek', 'przystanku', 'komunikacja', 'komunikacji', 'mpk', 'kolej', 'ska'],
     ];
 
-    /**
-     * Specific detail extractors that produce richer notable features.
-     * Each entry: [regex pattern => label template].
-     * $1, $2 etc. in the label are replaced with matched groups.
-     */
-    private const SPECIFIC_EXTRACTIONS = [
-        // Exposure / orientation
-        '/ekspozycj\w*\s+(?:okien\s+)?(?:na\s+)?(północ|południe|wschód|zachód|południow|północn|wschodni|zachodni)[\w\s,]*/u' => 'exposure',
-        // Balcony/terrace size
-        '/(?:balkon|taras|loggia)\w*\s+(?:o\s+)?(?:pow\.?\s*)?(\d+[.,]?\d*)\s*m/u' => 'outdoor_area',
-        // Garden size
-        '/(?:ogr[óo]d\w*|działk\w*)\s+(?:o\s+)?(?:pow\.?\s*)?(\d+[.,]?\d*)\s*m/u' => 'garden_area',
-        // Storage/basement size
-        '/piwnic\w*\s+(?:o\s+)?(?:pow\.?\s*)?(\d+[.,]?\d*)\s*m/u' => 'storage_area',
-        // Admin fee / czynsz
-        '/czynsz\w*\s+(?:ok\.?\s*)?(\d[\d\s]*)\s*(?:zł|pln)/iu' => 'admin_fee',
-        // Currently rented
-        '/(?:wynajęt|wynajmowane|aktualnie.*najm)/u' => 'currently_rented',
-        // Duplex / two-level
-        '/(?:dwupoziomow|duplex|antresol|dwa poziomy|dwóch poziom)/u' => 'duplex',
-        // French balcony
-        '/balkon\w*\s+francusk/u' => 'french_balcony',
-        // Ceiling height
-        '/wysoko[śsc]\w*\s+(?:pomieszczeń\s+)?(\d[.,]\d+)\s*m/u' => 'ceiling_height',
-        // Number of bathrooms
-        '/(\d)\s*(?:łazienk|toalet)/u' => 'bathrooms',
-        // Walk-in closet / garderoba
-        '/garderob/u' => 'walk_in_closet',
-        // Photovoltaics / EV
-        '/fotowoltai/u' => 'photovoltaics',
-        '/ładowark\w+\s+(?:do\s+)?(?:samochod|ev|elektr)/u' => 'ev_charging',
-        // Specific nearby landmarks (extract the actual name)
-        '/(?:blisko|w pobliżu|sąsiedztwie|przy)\s+(?:do\s+)?([A-ZĄĆĘŁŃÓŚŻŹ][\wąćęłńóśżźĄĆĘŁŃÓŚŻŹ\s]+(?:Park\w*|Bulwar\w*|Ryn\w*|Uniwersytet\w*|AGH|Politechnik\w*|Wawel\w*|Wisł\w*|Plac\w*|Błoni\w*|Galeri\w*))/u' => 'nearby_landmark',
-    ];
-
     public function enrich(Listing $listing): ?array
     {
         $raw = $listing->description;
@@ -684,7 +649,7 @@ class DeterministicEnricher
     private function translatePropertyType(?string $type): string
     {
         return match ($type) {
-            'apartment' => 'apartment',
+            'flat', 'apartment' => 'apartment',
             'house' => 'house',
             'room' => 'room',
             'studio' => 'studio',

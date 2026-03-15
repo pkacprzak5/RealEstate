@@ -302,7 +302,7 @@ export default function FilterBar({ filters, districts, onFilterChange, onFilter
         <div className="flex flex-wrap items-center gap-2">
             {/* District */}
             <Popover className="relative">
-                <PopoverButton className="h-9 px-3 flex items-center gap-1.5 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-navy-50 focus:border-navy">
+                <PopoverButton aria-label="Filtruj po dzielnicy" className="h-9 px-3 flex items-center gap-1.5 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-navy-50 focus:border-navy">
                     <MapPin className="w-3.5 h-3.5 text-gray-400" />
                     {filters.district || 'Dzielnica'}
                     <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
@@ -318,7 +318,7 @@ export default function FilterBar({ filters, districts, onFilterChange, onFilter
 
             {/* Price Range */}
             <Popover className="relative">
-                <PopoverButton className="h-9 px-3 flex items-center gap-1.5 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-navy-50 focus:border-navy">
+                <PopoverButton aria-label="Filtruj po cenie" className="h-9 px-3 flex items-center gap-1.5 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-navy-50 focus:border-navy">
                     <Banknote className="w-3.5 h-3.5 text-gray-400" />
                     {formatPriceLabel(Number(filters.min_price) || undefined, Number(filters.max_price) || undefined)}
                     <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
@@ -385,7 +385,7 @@ export default function FilterBar({ filters, districts, onFilterChange, onFilter
 
             {/* Area Range */}
             <Popover className="relative">
-                <PopoverButton className="h-9 px-3 flex items-center gap-1.5 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-navy-50 focus:border-navy">
+                <PopoverButton aria-label="Filtruj po powierzchni" className="h-9 px-3 flex items-center gap-1.5 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-navy-50 focus:border-navy">
                     <Maximize2 className="w-3.5 h-3.5 text-gray-400" />
                     {formatAreaLabel(Number(filters.min_area) || undefined, Number(filters.max_area) || undefined)}
                     <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
@@ -436,7 +436,7 @@ export default function FilterBar({ filters, districts, onFilterChange, onFilter
 
             {/* Rooms */}
             <Popover className="relative">
-                <PopoverButton className="h-9 px-3 flex items-center gap-1.5 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-navy-50 focus:border-navy">
+                <PopoverButton aria-label="Filtruj po liczbie pokoi" className="h-9 px-3 flex items-center gap-1.5 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-navy-50 focus:border-navy">
                     <DoorOpen className="w-3.5 h-3.5 text-gray-400" />
                     {formatRoomsLabel(Number(filters.min_rooms) || undefined, Number(filters.max_rooms) || undefined)}
                     <ChevronDown className="w-3.5 h-3.5 text-gray-400" />

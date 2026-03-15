@@ -10,9 +10,6 @@ echo "==> Listening on port $NGINX_PORT"
 # Render nginx config template
 envsubst '${NGINX_PORT}' < /etc/nginx/http.d/default.conf.template > /etc/nginx/http.d/default.conf
 
-# Debug: show DB config
-echo "==> DB_CONNECTION=$DB_CONNECTION DB_HOST=$DB_HOST DB_PORT=$DB_PORT DB_DATABASE=$DB_DATABASE DB_USERNAME=$DB_USERNAME"
-
 # Minimal .env — only APP_KEY lives here, everything else comes from system env vars
 echo "APP_KEY=" > .env
 
@@ -28,7 +25,7 @@ fi
 echo "==> Caching config and views..."
 php artisan config:cache
 php artisan view:cache
-# NOTE: route:cache is skipped because /debug-health uses a closure
+php artisan route:cache
 
 # Wait for database to be reachable
 echo "==> Waiting for database..."
@@ -65,29 +62,6 @@ HEALTH
 # PHP error logging to stderr
 echo "log_errors = On" > /usr/local/etc/php/conf.d/debug.ini
 echo "error_log = /dev/stderr" >> /usr/local/etc/php/conf.d/debug.ini
-
-# Diagnostic: test debug-health route (returns JSON, catches its own errors)
-echo "==> Smoke-testing /debug-health..."
-php artisan tinker --execute="
-\$request = \Illuminate\Http\Request::create('/debug-health');
-\$kernel = app(\Illuminate\Contracts\Http\Kernel::class);
-\$response = \$kernel->handle(\$request);
-echo 'STATUS: ' . \$response->getStatusCode() . PHP_EOL;
-echo 'BODY: ' . \$response->getContent() . PHP_EOL;
-" 2>&1 || true
-
-# Diagnostic: check if route cache and config cache are valid
-echo "==> Route list check..."
-php artisan route:list 2>&1 | head -20 || true
-
-echo "==> Config check..."
-php artisan tinker --execute="
-echo 'DB: ' . config('database.default') . PHP_EOL;
-echo 'HOST: ' . config('database.connections.mysql.host') . PHP_EOL;
-echo 'APP_URL: ' . config('app.url') . PHP_EOL;
-echo 'APP_KEY set: ' . (config('app.key') ? 'yes' : 'NO') . PHP_EOL;
-echo 'SESSION: ' . config('session.driver') . PHP_EOL;
-" 2>&1 || true
 
 # Fix storage permissions LAST — after all root artisan commands that may write to logs
 echo "==> Fixing storage permissions..."

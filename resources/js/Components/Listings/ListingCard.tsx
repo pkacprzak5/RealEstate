@@ -1,15 +1,11 @@
 import { Link } from '@inertiajs/react';
 import { MapPin, Maximize2, DoorOpen } from 'lucide-react';
 import Badge from '@/Components/UI/Badge';
+import { formatPrice, pluralizePl } from '@/utils/format';
 import { Listing } from '@/types';
 
 interface Props {
     listing: Listing;
-}
-
-function formatPrice(price: number | null, currency: string): string {
-    if (price === null) return 'Zapytaj o cenę';
-    return new Intl.NumberFormat('pl-PL', { style: 'currency', currency, maximumFractionDigits: 0 }).format(Number(price));
 }
 
 export default function ListingCard({ listing }: Props) {
@@ -61,7 +57,7 @@ export default function ListingCard({ listing }: Props) {
                     {listing.rooms && (
                         <span className="flex items-center gap-1">
                             <DoorOpen className="w-3.5 h-3.5" />
-                            {Number(listing.rooms)} {Number(listing.rooms) === 1 ? 'pokój' : Number(listing.rooms) < 5 ? 'pokoje' : 'pokoi'}
+                            {Number(listing.rooms)} {pluralizePl(Number(listing.rooms), 'pokój', 'pokoje', 'pokoi')}
                         </span>
                     )}
                     {listing.district && (

@@ -1,4 +1,5 @@
 import { MessageCircle, Loader, TriangleAlert, SearchX, Info } from 'lucide-react';
+import { pluralizePl } from '@/utils/format';
 import { AiRecommendation, AiSearchStatus } from '@/types';
 import AiRecommendationCard from './AiRecommendationCard';
 
@@ -104,7 +105,7 @@ export default function RecommendationsPanel({
 
             <div className="px-6 pt-4 pb-2">
                 <h3 className="text-sm font-semibold text-gray-900">
-                    {recommendations.length} {recommendations.length === 1 ? 'rekomendacja' : recommendations.length < 5 ? 'rekomendacje' : 'rekomendacji'}
+                    {recommendations.length} {pluralizePl(recommendations.length, 'rekomendacja', 'rekomendacje', 'rekomendacji')}
                 </h3>
             </div>
 

@@ -5,6 +5,7 @@ import L from 'leaflet';
 import 'leaflet.markercluster';
 import { MapPin, Maximize2, DoorOpen, X, List } from 'lucide-react';
 import Badge from '@/Components/UI/Badge';
+import { formatPrice } from '@/utils/format';
 import { MapPin as MapPinType } from '@/types';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
@@ -12,11 +13,6 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
 interface Props {
     pins: MapPinType[];
-}
-
-function formatPrice(price: number | null, currency: string): string {
-    if (price === null) return 'Zapytaj o cenę';
-    return new Intl.NumberFormat('pl-PL', { style: 'currency', currency, maximumFractionDigits: 0 }).format(Number(price));
 }
 
 /* SVG location pin — navy fill, white stroke; inverted when active */

@@ -1,14 +1,10 @@
 import { Link } from '@inertiajs/react';
 import { Maximize2, DoorOpen, MapPin, Star } from 'lucide-react';
+import { formatPrice } from '@/utils/format';
 import { AiRecommendation } from '@/types';
 
 interface Props {
     recommendation: AiRecommendation;
-}
-
-function formatPrice(price: number | null, currency: string): string {
-    if (price === null) return 'Zapytaj o cenę';
-    return new Intl.NumberFormat('pl-PL', { style: 'currency', currency, maximumFractionDigits: 0 }).format(Number(price));
 }
 
 function scoreLabel(score: number): string {
